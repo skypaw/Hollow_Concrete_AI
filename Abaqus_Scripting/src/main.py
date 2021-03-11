@@ -6,32 +6,71 @@ import os
 
 
 class Main:
-    file_name = None
-    file_path = None
+    __file_name = None
+    __file_path = None
+
+    __full_path = None
+
+    __results = None
 
     def __init__(self):
-        self.file_name = ReadConfig.file_name
-        self.file_path = ReadConfig.abaqus_file_path
+        self.__file_name = ReadConfig.file_name
+        self.__file_path = ReadConfig.abaqus_file_path
+
+    def full_path(self, extension):
+        __full_path = self.__file_path + self.__file_name + extension
 
     def creating_model(self):
         pass
 
     def checking_database(self):
-        full_path = self.file_path + self.file_name
+        """Checking database
+        ====================
 
-        if os.path.isfile(full_path):
+        Function responsible for checking if there is specific database.
+        If there is no database -> creating a new cea database for model
+
+        Possible databases:
+        1. cea
+        """
+
+        if os.path.isfile(self.__full_path):
             pass
         else:
-            CreateCae(self.file_name)
+            CreateCae(self.__full_path)
 
     def calculate(self):
-        pass
+        """Calculate
+        ============
 
-    def save_results(self):
-        SaveResults(results_array=[1,2])
+        Function responsible for creating a job for specific model in cea database.
+        """
+
+        pass
 
     def read_odb(self):
-        pass
+        """Read Odb
+        ===========
+
+        Function responsible for reading results from completed job.
+        """
+
+        self.__results = None
+
+    def save_results(self):
+        """"Save results
+        ================
+
+        Function for saving results of the calculation to csv file
+        """
+
+        SaveResults(self.__results)
 
     def modify_model(self):
+        """Modify model
+        ===============
+
+        Function responsible for modifying existing model in cea database
+        """
+
         pass
