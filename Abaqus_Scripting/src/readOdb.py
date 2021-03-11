@@ -1,8 +1,12 @@
 from odbAccess import *
 from createCae import *
+from readConfig import *
+from saveResults import *
 
+SaveResults([[4,3,2,4]])
 
 CreateCae(odb_name="andrzej")
+
 
 print("hello_wolrd")
 # https://github.com/liangzulin/abaqus_pycharm

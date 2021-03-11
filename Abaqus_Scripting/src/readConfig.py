@@ -1,6 +1,3 @@
-import configparser
-
-
 class ReadConfig:
     file_name = None
     abaqus_file_path = None
