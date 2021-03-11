@@ -1,7 +1,10 @@
 from odbAccess import *
+from createCae import *
+from readConfig import *
+from saveResults import *
 
-print("hello_wolrd")
-# https://github.com/liangzulin/abaqus_pycharm
+SaveResults([[4,3,2,4]])
+
 
 odb = openOdb("C:/temp/OczytaniePy.odb")
 print(odb)
