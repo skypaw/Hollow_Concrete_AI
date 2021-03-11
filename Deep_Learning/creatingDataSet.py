@@ -88,3 +88,6 @@ def data_for_testing():
         # increment
         i += 1
     return dimensions, cube_mass
+
+
+print(data_for_testing())

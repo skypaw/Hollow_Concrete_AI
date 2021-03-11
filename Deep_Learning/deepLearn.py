@@ -8,6 +8,7 @@ import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 
+
 # raw data
 dim, cm = creatingDataSet.data_for_network()
 
