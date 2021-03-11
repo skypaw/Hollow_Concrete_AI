@@ -1,4 +1,8 @@
 from odbAccess import *
+from createCae import *
+
+
+CreateCae(odb_name="andrzej")
 
 print("hello_wolrd")
 # https://github.com/liangzulin/abaqus_pycharm
