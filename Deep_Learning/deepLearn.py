@@ -1,9 +1,6 @@
 import creatingDataSet
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
-
-import numpy as np
-
 from tensorflow.keras.models import Sequential, save_model
 from tensorflow.keras.layers import Dense
 
@@ -26,6 +23,12 @@ class CreatingModel:
         self.__dim, self.__cm = shuffle(self.__dim, self.__cm)
 
     def creating_model(self):
+        """Creating model method
+        ========================
+
+        Method where the model is created. Here are assumed number of layers and neural connections.
+        """
+
         self.__model = Sequential([Dense(units=16, input_shape=(1,), activation='relu'),
                                    Dense(units=32, activation='relu'),
                                    Dense(units=32, activation='relu'),
@@ -35,10 +38,16 @@ class CreatingModel:
         self.__model.summary()
 
         self.__model.compile(optimizer='Adam', loss='mean_squared_error')
-        self.__model.fit(x=dim, y=cm, validation_split=0.1, epochs=200, batch_size=10)
+        self.__plot_from_model = self.__model.fit(x=dim, y=cm, validation_split=0.1, epochs=200, batch_size=10)
 
     def analyzing_model(self):
-        plot_data = self.__model.history['loss']
+        """Analyzing model method
+        =========================
+
+        Method responsible for creating a plots of losses in next epochs
+        """
+
+        plot_data = self.__plot_from_model.history['loss']
 
         plt.xlabel('Epoch Number')
         plt.ylabel('Loss Magnitude')
@@ -56,11 +65,6 @@ class CreatingModel:
             signatures=None,
             options=None,
             save_traces=True)
-        pass
-
-    def open_model(self):
-        # working on model - > object different class
-
         pass
 
 
