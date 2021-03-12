@@ -1,21 +1,19 @@
 from odbAccess import *
 from createCae import *
-from readConfig import *
 from saveResults import *
+from readConfig import *
+from readOdb import *
 import os
 
 
 class Main:
     __file_name = None
     __file_path = None
-
     __full_path = None
-
     __results = None
 
     def __init__(self):
-        self.__file_name = ReadConfig.file_name
-        self.__file_path = ReadConfig.abaqus_file_path
+        config()
 
     def full_path(self, extension):
         __full_path = self.__file_path + self.__file_name + extension
@@ -34,10 +32,10 @@ class Main:
         1. cea
         """
 
-        if os.path.isfile(self.__full_path):
-            pass
-        else:
+        if os.path.isfile(self.__full_path) is False:
             CreateCae(self.__full_path)
+
+
 
     def calculate(self):
         """Calculate
@@ -55,7 +53,8 @@ class Main:
         Function responsible for reading results from completed job.
         """
 
-        self.__results = None
+        result = read_odb()
+        self.__results = result
 
     def save_results(self):
         """"Save results
@@ -64,7 +63,7 @@ class Main:
         Function for saving results of the calculation to csv file
         """
 
-        SaveResults(self.__results)
+        save_to_csv(self.__results)
 
     def modify_model(self):
         """Modify model

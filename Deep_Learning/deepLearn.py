@@ -1,56 +1,69 @@
-# calling a function
 import creatingDataSet
 from sklearn.utils import shuffle
 import matplotlib.pyplot as plt
 
 import numpy as np
 
-from tensorflow.keras.models import Sequential
+from tensorflow.keras.models import Sequential, save_model
 from tensorflow.keras.layers import Dense
+
+
+class CreatingModel:
+    __dim = None
+    __cm = None
+    __model = None
+    __plot_from_model = None
+
+    def __init__(self, dim, cm):
+        self.__cm = cm
+        self.__dim = dim
+
+        self.optimize_data()
+        self.creating_model()
+        self.analyzing_model()
+
+    def optimize_data(self):
+        self.__dim, self.__cm = shuffle(self.__dim, self.__cm)
+
+    def creating_model(self):
+        self.__model = Sequential([Dense(units=16, input_shape=(1,), activation='relu'),
+                                   Dense(units=32, activation='relu'),
+                                   Dense(units=32, activation='relu'),
+                                   Dense(units=8, activation='relu'),
+                                   Dense(units=1)])
+
+        self.__model.summary()
+
+        self.__model.compile(optimizer='Adam', loss='mean_squared_error')
+        self.__model.fit(x=dim, y=cm, validation_split=0.1, epochs=200, batch_size=10)
+
+    def analyzing_model(self):
+        plot_data = self.__model.history['loss']
+
+        plt.xlabel('Epoch Number')
+        plt.ylabel('Loss Magnitude')
+        plt.plot(plot_data)
+        plt.show()
+        pass
+
+    def save_model(self):
+        save_model(
+            self.__model,
+            'resources\\model',  # todo -> to config
+            overwrite=True,
+            include_optimizer=True,
+            save_format=None,
+            signatures=None,
+            options=None,
+            save_traces=True)
+        pass
+
+    def open_model(self):
+        # working on model - > object different class
+
+        pass
 
 
 # raw data
 dim, cm = creatingDataSet.data_for_network()
-
-print(dim)
-print(cm)
-
-# rescaling data and shuffling
-dim, cm = shuffle(dim, cm)
-
-# sequential model
-model = Sequential([Dense(units=16, input_shape=(1,), activation='relu'),
-                    Dense(units=32, activation='relu'),
-                    Dense(units=32, activation='relu'),
-                    Dense(units=8, activation='relu'),
-                    Dense(units=1)])
-
-model.summary()
-
-model.compile(optimizer='Adam', loss='mean_squared_error')
-plot_from_model = model.fit(x=dim, y=cm, validation_split=0.1, epochs=200, batch_size=10)
-
-plt.xlabel('Epoch Number')
-plt.ylabel('Loss Magnitude')
-plt.plot(plot_from_model.history['loss'])
-plt.show()
-
-test_data, test_mass = creatingDataSet.data_for_testing()
-
-plot_mass = np.empty((0, 1), float)
-plot_predicted_mass = np.empty((0, 1), float)
-
-# todo -> 2 interpreters (abaqus + neural network)
-# todo -> class for creating dataset, class for creating and learning model + saving model, analyzing data in next class
-# todo -> documentation
-
-for element in test_data:
-    plot_mass = np.append(plot_mass, creatingDataSet.mass(element, 2500))
-    plot_predicted_mass = np.append(plot_predicted_mass, model.predict([element]))
-
-plt.xlabel('Dimensions - volume [m^3]')
-plt.ylabel('Mass [kg]')
-plt.plot(test_data, plot_predicted_mass)
-plt.plot(test_data, plot_mass)
-plt.grid(linestyle='-', linewidth=0.1)
-plt.show()
+CreatingModel(dim, cm)
