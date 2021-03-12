@@ -3,6 +3,12 @@ import matplotlib.pyplot as plt
 
 
 def volume(a, r):
+    """" volume - temporary function
+    ================================
+
+    Calculate volume of concrete cube
+    """
+
     volume_cube = a ** 3
     volume_cylinder = np.pi * r ** 2 * a
     volume_final = volume_cube - volume_cylinder
@@ -10,11 +16,24 @@ def volume(a, r):
 
 
 def mass(volume_final, concrete):
+    """" mass - temporary function
+    ================================
+
+    Calculate mass of concrete cube
+    """
+
     cube_mass_calculation = concrete * volume_final
     return cube_mass_calculation
 
 
 def data_for_network():
+    """" data for networ - temporary function
+    ================================
+
+    It creates two arrays of data mass array and volume array based on two functions above with from minimum dimension
+    to maximum, by increasing value of dimension a by 2 mm, and r by 1 mm
+    """
+
     r = 0.05
     a = 0.150
     concrete = 2500
