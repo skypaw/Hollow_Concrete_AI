@@ -1,8 +1,8 @@
 from odbAccess import *
 from createCae import *
 from saveResults import *
-from readConfig import *
 from readOdb import *
+from createModel import *
 import os
 
 
@@ -11,9 +11,10 @@ class Main:
     __file_path = None
     __full_path = None
     __results = None
+    __model_database = None
 
     def __init__(self):
-        config()
+        pass
 
     def full_path(self, extension):
         __full_path = self.__file_path + self.__file_name + extension
