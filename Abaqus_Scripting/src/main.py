@@ -1,51 +1,26 @@
 from odbAccess import *
-from createCae import *
 from saveResults import *
 from readOdb import *
 from createModel import *
 import os
+from createModel import CreateModel
 
 
 class Main:
     __file_name = None
     __file_path = None
     __full_path = None
-    __results = None
+    __results = []
+    __dimensions = []
     __model_database = None
 
-    def __init__(self):
-        pass
+    model_object = None
 
-    def full_path(self, extension):
-        __full_path = self.__file_path + self.__file_name + extension
+    def __init__(self):
+        self.model_object = CreateModel()
 
     def creating_model(self):
-        pass
-
-    def checking_database(self):
-        """Checking database
-        ====================
-
-        Function responsible for checking if there is specific database.
-        If there is no database -> creating a new cea database for model
-
-        Possible databases:
-        1. cea
-        """
-
-        if os.path.isfile(self.__full_path) is False:
-            CreateCae(self.__full_path)
-
-
-
-    def calculate(self):
-        """Calculate
-        ============
-
-        Function responsible for creating a job for specific model in cea database.
-        """
-
-        pass
+        self.model_object.create_database()
 
     def read_odb(self):
         """Read Odb
@@ -55,7 +30,7 @@ class Main:
         """
 
         result = read_odb()
-        self.__results = result
+        self.__results.append(result)
 
     def save_results(self):
         """"Save results
@@ -64,13 +39,13 @@ class Main:
         Function for saving results of the calculation to csv file
         """
 
-        save_to_csv(self.__results)
+        save_to_csv(self.__results, 'results')
 
-    def modify_model(self):
-        """Modify model
-        ===============
+    def save_dimensions(self):
+        save_to_csv(self.__dimensions, 'dimensions')
 
-        Function responsible for modifying existing model in cea database
-        """
+    def read_dimensions(self):
+        self.__dimensions.append(self.model_object.save_dimensions())
 
-        pass
+    def modify_model(self, a, h, a_s, as1, r):
+        self.model_object.dimensions_setter(a, h, a_s, as1, r)

@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def save_to_csv(results_array):
+def save_to_csv(results_array, name):
     """"Save to csv
     ===============
 
@@ -9,7 +9,7 @@ def save_to_csv(results_array):
     """
 
     try:
-        np.savetxt('results.csv', results_array, delimiter=" ", fmt='% s')
+        np.savetxt("%s.csv" % name, results_array, delimiter=" ", fmt='% s')
 
     except IOError:
-        print ('Problem with results.csv file')
+        print('Problem with results.csv file')

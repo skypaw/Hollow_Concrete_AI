@@ -22,9 +22,10 @@ class LoadModel:
         """
 
         self.__load_model(model_name)
+        print(self.__model.get_weights())
 
     def __load_model(self, model_name):
-        self.__model = load_model(f'\\resources\\{model_name}', compile=True, options=None)
+        self.__model = load_model(f'resources\\{model_name}', compile=True, options=None)
 
     def predict_value(self, value_for_prediction):
         """Predict value method
@@ -35,3 +36,6 @@ class LoadModel:
 
         predicted_value = self.__model.predict(value_for_prediction)
         return predicted_value
+
+LoadModel('model')
+

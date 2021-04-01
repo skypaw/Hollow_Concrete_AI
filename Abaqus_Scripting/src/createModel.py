@@ -23,18 +23,41 @@ import numpy as np
 
 
 class CreateModel(Model):
-    _a = 25
-    _h = 20
-    _as = 29
-    _a1 = 5
-    _r = 7
+    _a = None
+    _h = None
+    _as = None
+    _a1 = None
+    _r = None
 
     def __init__(self):
         Model.__init__(self)
 
+    def dimensions_setter(self, a, h, a_s, a1, r):
+        self._a = a
+        self._h = h
+        self._as = a_s
+        self._a1 = a1
+        self._r = r
+
+    def create_database(self):
         self._create_model_database()
 
     def _create_model_database(self):
+        # from model -> todo delete datum
+
+        Mdb()
+        self._model_database = mdb
+        self._model_database.saveAs(pathName=self._path)
+        self._model_database.models.changeKey(fromName='Model-1', toName=self._model_name)
+        self._materials()
+        self._profile_create()
+        self._section_create()
+        self._step_create()
+        self._job_create()
+        self._save_model()
+
+        # from create model
+
         self.__part_concrete_cube()
         self.__part_steel_rod()
         self._model_assembly()
@@ -46,6 +69,7 @@ class CreateModel(Model):
         self.__create_history()
         self._save_model()
         self._job_calculate()
+        self._model_delete()
 
     def __part_concrete_cube(self):
         """part concrete cube function

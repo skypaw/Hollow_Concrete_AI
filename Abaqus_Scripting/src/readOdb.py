@@ -1,5 +1,4 @@
 from odbAccess import *
-from saveResults import save_to_csv
 
 
 def read_odb():
@@ -9,8 +8,6 @@ def read_odb():
     region = steps.historyRegions['Node ASSEMBLY.1']
 
     u2data = region.historyOutputs['RF3']
+    tuple_data = u2data.data[1]
 
-    save_to_csv(u2data.data)
-
-
-read_odb()
+    return tuple_data[1]
