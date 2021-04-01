@@ -1,6 +1,6 @@
 import subprocess
 
-subprocess.call("abaqus cae noGUI=src\\readOdb.py", shell=True)
+subprocess.call("abaqus cae noGUI=src\\creatingDataSet.py", shell=True)
 
 
 """For creating dataset 

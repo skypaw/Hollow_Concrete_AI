@@ -52,17 +52,8 @@ class Model:
     _as_r = 5
 
     def __init__(self):
-        Mdb()
-        self._model_database = mdb
-        self._model_database.saveAs(pathName=self._path)
-        self._model_database.models.changeKey(fromName='Model-1', toName=self._model_name)
+        pass
 
-        self._materials()
-        self._profile_create()
-        self._section_create()
-        self._step_create()
-        self._job_create()
-        self._save_model()
 
     def _save_model(self):
         self._model_database.save()
@@ -134,7 +125,7 @@ class Model:
         """
 
         self._model_database.models[self._model_name].StaticStep(name='Step-1', previous='Initial',
-                                                                 maxNumInc=10000, initialInc=0.01, minInc=1e-10,
+                                                                 maxNumInc=10000, initialInc=1, minInc=1e-10,
                                                                  nlgeom=ON)
 
     #
@@ -177,7 +168,6 @@ class Model:
         e2 = a.instances['SteelRod-2'].edges
         edges2 = e2.getSequenceFromMask(mask=('[#1 ]',), )
         region1 = regionToolset.Region(edges=edges1 + edges2)
-        a = self._model_database.models[self._model_name].rootAssembly
         c1 = a.instances['ConcreteCube-1'].cells
         cells1 = c1.getSequenceFromMask(mask=('[#1 ]',), )
         region2 = regionToolset.Region(cells=cells1)
@@ -230,13 +220,13 @@ class Model:
         region = regionToolset.Region(referencePoints=refPoints1)
         self._model_database.models[self._model_name].DisplacementBC(name='BC-2', createStepName='Step-1',
                                                                      region=region,
-                                                                     u1=UNSET, u2=-1.0, u3=UNSET, ur1=UNSET,
+                                                                     u1=UNSET, u2=-0.1, u3=UNSET, ur1=UNSET,
                                                                      ur2=UNSET,
                                                                      ur3=UNSET, amplitude=UNSET, fixed=OFF,
                                                                      distributionType=UNIFORM, fieldName='',
                                                                      localCsys=None)
-        self._model_database.models[self._model_name].boundaryConditions['BC-2'].setValues(u1=-1.0, u2=UNSET)
-        self._model_database.models[self._model_name].boundaryConditions['BC-2'].setValues(u1=UNSET, u3=-1.0)
+        self._model_database.models[self._model_name].boundaryConditions['BC-2'].setValues(u1=-0.1, u2=UNSET)
+        self._model_database.models[self._model_name].boundaryConditions['BC-2'].setValues(u1=UNSET, u3=-0.1)
 
     def _mesh_calculation(self):
         self.__mesh_size = (self._a + self._h) / 2 / 10
@@ -281,6 +271,10 @@ class Model:
     def _job_calculate(self):
         self._model_database.jobs['HC-Slab-Job'].submit(consistencyChecking=OFF)
 
+    def _model_delete(self):
+        self._model_database.Model(name='Model-1', modelType=STANDARD_EXPLICIT)
+        del self._model_database.models[self._model_name]
+
     def _check_radius(self):
         equation = 2 * self._r + 2 * self._a1
 
@@ -291,6 +285,6 @@ class Model:
         if self._a1 < self._as_r:
             self._a1 = self._as_r + 30
 
-    def _save_dimensions_tc_csv(self):
-        dimensions = [self._a, self._h, self._h, self._as_r, self._a1]
+    def save_dimensions(self):
+        dimensions = [self._a, self._h, self._r, self._as, self._a1]
         return dimensions
