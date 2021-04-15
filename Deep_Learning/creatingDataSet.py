@@ -43,7 +43,7 @@ def data_for_network():
     cube_mass = np.empty((0, 1), float)
 
     i = 0
-    range_max = 176
+    range_max = 760
 
     for i in range(range_max):
         volume_final = volume(a, r)

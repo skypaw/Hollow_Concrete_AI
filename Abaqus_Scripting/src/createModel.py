@@ -18,6 +18,7 @@ import visualization
 import xyPlot
 import displayGroupOdbToolset as dgo
 import connectorBehavior
+from log import log
 
 import numpy as np
 
@@ -28,16 +29,22 @@ class CreateModel(Model):
     _as = None
     _a1 = None
     _r = None
+    _l = None
+    _c_nom = None
+    i = None
 
     def __init__(self):
         Model.__init__(self)
+        self.i = 0
 
-    def dimensions_setter(self, a, h, a_s, a1, r):
+    def dimensions_setter(self, a, h, a_s, a1, r, l, c_nom):
         self._a = a
         self._h = h
         self._as = a_s
         self._a1 = a1
         self._r = r
+        self._l = l
+        self._c_nom = c_nom
 
     def create_database(self):
         self._create_model_database()
@@ -48,16 +55,17 @@ class CreateModel(Model):
         Mdb()
         self._model_database = mdb
         self._model_database.saveAs(pathName=self._path)
-        self._model_database.models.changeKey(fromName='Model-1', toName=self._model_name)
+        self._model_database.models.changeKey(fromName='Model-1', toName=self._model_name.format(self.i))
         self._materials()
         self._profile_create()
         self._section_create()
         self._step_create()
         self._job_create()
-        self._save_model()
 
         # from create model
 
+        self._check_lagging()
+        self._check_radius()
         self.__part_concrete_cube()
         self.__part_steel_rod()
         self._model_assembly()
@@ -69,7 +77,6 @@ class CreateModel(Model):
         self.__create_history()
         self._save_model()
         self._job_calculate()
-        self._model_delete()
 
     def __part_concrete_cube(self):
         """part concrete cube function
@@ -79,20 +86,54 @@ class CreateModel(Model):
         and /r/
         """
 
-        s = self._model_database.models[self._model_name].ConstrainedSketch(name='__profile__', sheetSize=self._a)
-        s.setPrimaryObject(option=STANDALONE)
+        if self._l == 0:
+            s = self._model_database.models[self._model_name.format(self.i)].ConstrainedSketch(name='__profile__',
+                                                                                               sheetSize=self._a)
+            s.setPrimaryObject(option=STANDALONE)
 
-        s.rectangle(point1=(0.0, 0.0), point2=(self._a, self._h))
-        s.CircleByCenterPerimeter(center=(self._a / 2, self._h / 2),
-                                  point1=(self._a / 2, self._h / 2 - self._r))
+            s.rectangle(point1=(0.0, 0.0), point2=(self._a, self._h))
+            s.CircleByCenterPerimeter(center=(self._a / 2, self._h / 2),
+                                      point1=(self._a / 2, self._h / 2 - self._r))
 
-        self._model_database.models[self._model_name].Part(name=self._cube_part_name, dimensionality=THREE_D,
-                                                           type=DEFORMABLE_BODY)
+            self._model_database.models[self._model_name.format(self.i)].Part(name=self._cube_part_name,
+                                                                              dimensionality=THREE_D,
+                                                                              type=DEFORMABLE_BODY)
 
-        p = self._model_database.models[self._model_name].parts[self._cube_part_name]
-        p.BaseSolidExtrude(sketch=s, depth=self._a)
+            p = self._model_database.models[self._model_name.format(self.i)].parts[self._cube_part_name]
+            p.BaseSolidExtrude(sketch=s, depth=self._a)
 
-        del self._model_database.models[self._model_name].sketches['__profile__']
+            del self._model_database.models[self._model_name.format(self.i)].sketches['__profile__']
+
+        else:
+            s = self._model_database.models[self._model_name.format(self.i)].ConstrainedSketch(name='__profile__',
+                                                                                               sheetSize=self._a)
+            s.setPrimaryObject(option=STANDALONE)
+
+            s.rectangle(point1=(0.0, 0.0), point2=(self._a, self._h))
+
+            down_point_line = self._h / 2 - self._l / 2
+            up_point_line = self._h / 2 + self._l / 2
+            left_point_line = self._a / 2 - self._r
+            right_point_line = self._a / 2 + self._r
+
+            s.Line(point1=(left_point_line, down_point_line), point2=(left_point_line, up_point_line))
+            # s.VerticalConstraint(entity=g[6], addUndoState=False)
+            s.Line(point1=(right_point_line, down_point_line), point2=(right_point_line, up_point_line))
+            # s.VerticalConstraint(entity=g[7], addUndoState=False)
+
+            s.ArcByCenterEnds(center=(self._a / 2, up_point_line), point1=(left_point_line, up_point_line),
+                              point2=(right_point_line, up_point_line), direction=CLOCKWISE)
+            s.ArcByCenterEnds(center=(self._a / 2, down_point_line), point1=(right_point_line, down_point_line),
+                              point2=(left_point_line, down_point_line), direction=CLOCKWISE)
+
+            self._model_database.models[self._model_name.format(self.i)].Part(name=self._cube_part_name,
+                                                                              dimensionality=THREE_D,
+                                                                              type=DEFORMABLE_BODY)
+
+            p = self._model_database.models[self._model_name.format(self.i)].parts[self._cube_part_name]
+            p.BaseSolidExtrude(sketch=s, depth=self._a)
+
+            del self._model_database.models[self._model_name.format(self.i)].sketches['__profile__']
 
     def __part_steel_rod(self):
         """part steel rod function
@@ -101,7 +142,8 @@ class CreateModel(Model):
         Function creating 2D wire with the dimension /a/
         """
 
-        s = self._model_database.models[self._model_name].ConstrainedSketch(name='__profile__', sheetSize=200.0)
+        s = self._model_database.models[self._model_name.format(self.i)].ConstrainedSketch(name='__profile__',
+                                                                                           sheetSize=200.0)
         g = s.geometry
 
         s.setPrimaryObject(option=STANDALONE)
@@ -109,14 +151,14 @@ class CreateModel(Model):
 
         s.HorizontalConstraint(entity=g[2], addUndoState=False)
 
-        self._model_database.models[self._model_name].Part(name=self._reinforcement_part_name,
-                                                           dimensionality=THREE_D,
-                                                           type=DEFORMABLE_BODY)
+        self._model_database.models[self._model_name.format(self.i)].Part(name=self._reinforcement_part_name,
+                                                                          dimensionality=THREE_D,
+                                                                          type=DEFORMABLE_BODY)
 
-        p = self._model_database.models[self._model_name].parts[self._reinforcement_part_name]
+        p = self._model_database.models[self._model_name.format(self.i)].parts[self._reinforcement_part_name]
         p.BaseWire(sketch=s)
 
-        del self._model_database.models[self._model_name].sketches['__profile__']
+        del self._model_database.models[self._model_name.format(self.i)].sketches['__profile__']
 
         e = p.edges
         edges = e.getSequenceFromMask(mask=('[#1 ]',), )
@@ -125,15 +167,15 @@ class CreateModel(Model):
         p.assignBeamSectionOrientation(region=region, method=N1_COSINES, n1=(0.0, 0.0, -1.0))
 
     def __create_history(self):
-        a = self._model_database.models[self._model_name].rootAssembly
+        a = self._model_database.models[self._model_name.format(self.i)].rootAssembly
         r1 = a.referencePoints
         refPoints1 = (r1[10],)
         a.Set(referencePoints=refPoints1, name='Set-1')
-        regionDef = self._model_database.models[self._model_name].rootAssembly.sets['Set-1']
-        self._model_database.models[self._model_name].HistoryOutputRequest(name='H-Output-2', createStepName='Step-1',
-                                                                           variables=('RF3',), frequency=LAST_INCREMENT,
-                                                                           region=regionDef, sectionPoints=DEFAULT,
-                                                                           rebar=EXCLUDE)
-
-
-CreateModel()
+        regionDef = self._model_database.models[self._model_name.format(self.i)].rootAssembly.sets['Set-1']
+        self._model_database.models[self._model_name.format(self.i)].HistoryOutputRequest(name='H-Output-2',
+                                                                                          createStepName='Step-1',
+                                                                                          variables=('RF3',),
+                                                                                          frequency=LAST_INCREMENT,
+                                                                                          region=regionDef,
+                                                                                          sectionPoints=DEFAULT,
+                                                                                          rebar=EXCLUDE)
