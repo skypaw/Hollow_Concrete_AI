@@ -31,9 +31,12 @@ class Main:
 
         Function responsible for reading results from completed job.
         """
-
-        result = read_odb(self.__i)
-        self.__results.append(result)
+        try:
+            result = read_odb(self.__i)
+            self.__results.append(result)
+        except Exception, e:
+            log(e)
+            self.__results.append(0)
 
         '''if os.path.exists('C:\\temp\\HC-Slab-Job-{}.odb'.format(self.__i)):
             os.remove('C:\\temp\\HC-Slab-Job-{}.com'.format(self.__i))

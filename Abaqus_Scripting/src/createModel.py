@@ -66,6 +66,7 @@ class CreateModel(Model):
 
         self._check_lagging()
         self._check_radius()
+
         self.__part_concrete_cube()
         self.__part_steel_rod()
         self._model_assembly()
@@ -117,9 +118,7 @@ class CreateModel(Model):
             right_point_line = self._a / 2 + self._r
 
             s.Line(point1=(left_point_line, down_point_line), point2=(left_point_line, up_point_line))
-            # s.VerticalConstraint(entity=g[6], addUndoState=False)
             s.Line(point1=(right_point_line, down_point_line), point2=(right_point_line, up_point_line))
-            # s.VerticalConstraint(entity=g[7], addUndoState=False)
 
             s.ArcByCenterEnds(center=(self._a / 2, up_point_line), point1=(left_point_line, up_point_line),
                               point2=(right_point_line, up_point_line), direction=CLOCKWISE)
@@ -166,16 +165,3 @@ class CreateModel(Model):
 
         p.assignBeamSectionOrientation(region=region, method=N1_COSINES, n1=(0.0, 0.0, -1.0))
 
-    def __create_history(self):
-        a = self._model_database.models[self._model_name.format(self.i)].rootAssembly
-        r1 = a.referencePoints
-        refPoints1 = (r1[10],)
-        a.Set(referencePoints=refPoints1, name='Set-1')
-        regionDef = self._model_database.models[self._model_name.format(self.i)].rootAssembly.sets['Set-1']
-        self._model_database.models[self._model_name.format(self.i)].HistoryOutputRequest(name='H-Output-2',
-                                                                                          createStepName='Step-1',
-                                                                                          variables=('RF3',),
-                                                                                          frequency=LAST_INCREMENT,
-                                                                                          region=regionDef,
-                                                                                          sectionPoints=DEFAULT,
-                                                                                          rebar=EXCLUDE)

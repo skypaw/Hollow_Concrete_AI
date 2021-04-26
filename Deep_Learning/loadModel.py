@@ -45,9 +45,13 @@ _dim = read_csv('dimensions')
 _res = read_csv('results')
 
 i = 0
-for f in _dim:
-    pred = LoadModel.predict_value(ste, np.array([f]))
 
-    print(pred, _res[i]/1e10)
+accuracy = []
+for f in _dim:
+    pred = float(LoadModel.predict_value(ste, np.array([f])))
+    eq = abs(abs(pred) - abs(_res[i]/1e10))/abs(_res[i]/1e10)*100
+    accuracy.append(eq)
+    print(pred)
     i =i+1
 
+print (f'Błąd w przewidywaniu = {np.mean(accuracy)}%')

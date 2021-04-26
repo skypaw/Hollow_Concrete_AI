@@ -5,6 +5,7 @@ import subprocess
 from abaqus import *
 from abaqusConstants import *
 import numpy as np
+import constantValues as const
 import __main__
 
 import section
@@ -27,26 +28,23 @@ import connectorBehavior
 
 from log import log
 
+
 class Model:
-    _path = 'C:/temp/model-test-34'
+    _path = const.MODEL_DATABASE_NAME
+
+    _model_name = const.MODEL_NAME
+    _steel_material_name = const.REINFORCEMENT_MATERIAL_NAME
+    _concrete_material_name = const.SOLID_MATERIAL_NAME
+    _young_reinforcement = const.YOUNG_REINFORCEMENT
+    _young_concrete = const.YOUNG_CONCRETE
+    _cube_part_name = const.SOLID_PART_NAME
+    _reinforcement_part_name = const.REINFORCEMENT_PART_NAME
+    _POISSON_REINFORCEMENT = const.POISSON_REINFORCEMENT
+    _POISSON_CONCRETE = const.POISSON_CONCRETE
+    _cube_part_name_assembly = const.SOLID_ASSEMBLY_NAME
+    _reinforcement_part_name_assembly = const.REINFORCEMENT_ASSEMBLY_NAME
 
     _model_database = None
-
-    _model_name = 'Hollow-Concrete-{}'
-    _steel_material_name = 'Steel'
-    _concrete_material_name = 'Concrete'
-    _young_reinforcement = 209e9
-    _young_concrete = 30e9
-    _cube_part_name = 'Concrete-Cube'
-    _reinforcement_part_name = 'Steel-Rod'
-
-    _cube_part_name_assembly = 'Concrete-Cube-1'
-    _reinforcement_part_name_assembly = 'Steel-Rod-{}'
-
-    __mesh_size = None
-
-    _POISSON_REINFORCEMENT = 0.3
-    _POISSON_CONCRETE = 0.2
 
     _a = None
     _h = None
@@ -56,9 +54,10 @@ class Model:
     _l = None
     _c_nom = None
 
-    _as_r = 5
-
+    _as_r = None
+    __mesh_size = None
     i = 0
+
 
     def __init__(self):
         os.chdir(r"C:\temp")
@@ -96,19 +95,6 @@ class Model:
         self._model_database.models[self._model_name.format(self.i)].materials[self._concrete_material_name].Elastic(
             table=((self._young_concrete, self._POISSON_CONCRETE),))
 
-    def _profile_create(self):
-        """profile create function
-        ===========================
-
-        Create rod profile for 2D steel rod.
-
-        Parameters:
-            1. Radius
-        """
-
-        self.__r_calculate()
-        self._model_database.models[self._model_name.format(self.i)].CircularProfile(name='Rod', r=self._as_r)
-
     def _section_create(self):
         """section create function
         ==========================
@@ -120,12 +106,9 @@ class Model:
                                                                                              material=self._concrete_material_name,
                                                                                              thickness=None)
 
-        self._model_database.models[self._model_name.format(self.i)].BeamSection(name='Section-reinforcement',
-                                                                                 integration=DURING_ANALYSIS,
-                                                                                 poissonRatio=0.0, profile='Rod',
-                                                                                 material=self._steel_material_name,
-                                                                                 temperatureVar=LINEAR,
-                                                                                 consistentMassMatrix=False)
+        self._model_database.models[self._model_name.format(self.i)].TrussSection(name='Section-reinforcement',
+                                                                                  material=self._steel_material_name,
+                                                                                  area=self._as_r)
 
     def _step_create(self):
         """step create function
@@ -191,81 +174,25 @@ class Model:
                                                                                     fractionalTolerance=0.05,
                                                                                     toleranceMethod=BOTH)
 
-        a = self._model_database.models[self._model_name.format(self.i)].rootAssembly
-        e11 = a.instances['ConcreteCube-1'].edges
-        a.DatumPointByMidPoint(point1=a.instances['ConcreteCube-1'].InterestingPoint(edge=e11[0], rule=MIDDLE),
-                               point2=a.instances['ConcreteCube-1'].InterestingPoint(edge=e11[7], rule=MIDDLE))
-
-        d21 = a.datums
-
-        self._save_model()
-
-        a.ReferencePoint(point=d21[9])
-
-        a = self._model_database.models[self._model_name.format(self.i)].rootAssembly
-        r1 = a.referencePoints
-        refPoints1 = (r1[10],)
-        region1 = regionToolset.Region(referencePoints=refPoints1)
-        a = self._model_database.models[self._model_name.format(self.i)].rootAssembly
-        s1 = a.instances['ConcreteCube-1'].faces
-        side1Faces1 = s1.getSequenceFromMask(mask=('[#20 ]',), )
-        region2 = regionToolset.Region(side1Faces=side1Faces1)
-        self._model_database.models[self._model_name.format(self.i)].Coupling(name='Constraint-2', controlPoint=region1,
-                                                                              surface=region2,
-                                                                              influenceRadius=WHOLE_SURFACE,
-                                                                              couplingType=KINEMATIC,
-                                                                              localCsys=None, u1=ON, u2=ON, u3=ON,
-                                                                              ur1=ON, ur2=ON,
-                                                                              ur3=ON)
-
-    def _boundary_conditions(self):
-        a = self._model_database.models[self._model_name.format(self.i)].rootAssembly
-        f1 = a.instances['ConcreteCube-1'].faces
-        faces1 = f1.getSequenceFromMask(mask=('[#40 ]',), )
-        region = regionToolset.Region(faces=faces1)
-        self._model_database.models[self._model_name.format(self.i)].DisplacementBC(name='BC-1',
-                                                                                    createStepName='Step-1',
-                                                                                    region=region,
-                                                                                    u1=0.0, u2=0.0, u3=0.0, ur1=0.0,
-                                                                                    ur2=0.0, ur3=0.0,
-                                                                                    amplitude=UNSET, fixed=OFF,
-                                                                                    distributionType=UNIFORM,
-                                                                                    fieldName='', localCsys=None)
-
-        a = self._model_database.models[self._model_name.format(self.i)].rootAssembly
-        r1 = a.referencePoints
-        refPoints1 = (r1[10],)
-        region = regionToolset.Region(referencePoints=refPoints1)
-        self._model_database.models[self._model_name.format(self.i)].DisplacementBC(name='BC-2',
-                                                                                    createStepName='Step-1',
-                                                                                    region=region,
-                                                                                    u1=UNSET, u2=-0.1, u3=UNSET,
-                                                                                    ur1=UNSET,
-                                                                                    ur2=UNSET,
-                                                                                    ur3=UNSET, amplitude=UNSET,
-                                                                                    fixed=OFF,
-                                                                                    distributionType=UNIFORM,
-                                                                                    fieldName='',
-                                                                                    localCsys=None)
-        self._model_database.models[self._model_name.format(self.i)].boundaryConditions['BC-2'].setValues(u1=-0.1,
-                                                                                                          u2=UNSET)
-        self._model_database.models[self._model_name.format(self.i)].boundaryConditions['BC-2'].setValues(u1=UNSET,
-                                                                                                          u3=-0.1)
-
     def _mesh_calculation(self):
         self.__mesh_size = (self._a + self._h) / 2 / 15
 
     def _mesh_set(self):
-        p = self._model_database.models[self._model_name.format(self.i)].parts[
-            self._reinforcement_part_name.format('1')]
+        p = self._model_database.models[self._model_name.format(self.i)].parts[self._cube_part_name]
         p.seedPart(size=self.__mesh_size, deviationFactor=0.1, minSizeFactor=0.1)
-        p = self._model_database.models[self._model_name.format(self.i)].parts[
-            self._reinforcement_part_name.format('1')]
+        p = self._model_database.models[self._model_name.format(self.i)].parts[self._cube_part_name]
         p.generateMesh()
 
-        p = self._model_database.models[self._model_name.format(self.i)].parts[self._cube_part_name]
+        elemType1 = mesh.ElemType(elemCode=T3D2, elemLibrary=STANDARD)
+        p = self._model_database.models[self._model_name.format(self.i)].parts[
+            self._reinforcement_part_name.format('1')]
+        e = p.edges
+        edges = e.getSequenceFromMask(mask=('[#1 ]',), )
+        pickedRegions = (edges,)
+        p.setElementType(regions=pickedRegions, elemTypes=(elemType1,))
         p.seedPart(size=self.__mesh_size, deviationFactor=0.1, minSizeFactor=0.1)
-        p = self._model_database.models[self._model_name.format(self.i)].parts[self._cube_part_name]
+        p = self._model_database.models[self._model_name.format(self.i)].parts[
+            self._reinforcement_part_name.format('1')]
         p.generateMesh()
 
     def _section_assigment(self):
@@ -309,10 +236,10 @@ class Model:
         del self._model_database.jobs['HC-Slab-Job-{}'.format(self.i)]
 
     def _check_radius(self):
-        equation = 2 * self._r + 2 * self._a1
+        equation = 2 * self._r + 2 * self._c_nom
 
         if equation > self._a:
-            self._r = (self._a - (2 * self._a1)) / 2
+            self._r = (self._a - (2 * self._c_nom)) / 2
 
     def _check_lagging(self):
         '''
@@ -322,7 +249,7 @@ class Model:
 
         if self._a1 * 2 + self._r * 2 + self._l >= self._h:
             self._l = self._h - (self._a1 * 2 + self._r * 2)
-            log(self._l)
+
             if self._l < 0:
                 self._l = 0
 
