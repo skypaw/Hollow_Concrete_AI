@@ -72,6 +72,8 @@ class CreatingModel:
                   self.__plot_from_model = self.__model.fit(x=self.__dim, y=self.__res_optimized, validation_split=0.2,
                                                   epochs=100, batch_size=5,
                                                   callbacks=self.__tensor_board)'''
+
+        print(self.__model.get_weights())
         return self.__model
 
     def estimator(self):
