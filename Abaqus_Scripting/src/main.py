@@ -2,7 +2,7 @@ from odbAccess import *
 from saveResults import *
 from readOdb import *
 import os
-from Model import Model
+from model import Model
 from log import log
 import time
 

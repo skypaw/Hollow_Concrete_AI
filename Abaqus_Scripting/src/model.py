@@ -1,13 +1,10 @@
 import os
-from time import sleep
-import subprocess
-
 from abaqus import *
 from abaqusConstants import *
 import numpy as np
 import constantValues as const
+import changeInput as c_input
 import __main__
-
 import section
 import regionToolset
 import displayGroupMdbToolset as dgm
@@ -26,6 +23,8 @@ import xyPlot
 import displayGroupOdbToolset as dgo
 import connectorBehavior
 
+import modelFunctions as m_functions
+
 
 class Model:
     _path = const.MODEL_DATABASE_NAME
@@ -41,9 +40,10 @@ class Model:
     _POISSON_CONCRETE = const.POISSON_CONCRETE
     _cube_part_name_assembly = const.SOLID_ASSEMBLY_NAME
     _reinforcement_part_name_assembly = const.REINFORCEMENT_ASSEMBLY_NAME
+    _job_name = const.JOB_NAME
 
-    _model_database = None
-    _model_parameters = None
+    _model_database = None  # CEA database
+    _model_parameters = None  # database with model name
 
     _a = None
     _h = None
@@ -53,29 +53,18 @@ class Model:
     _l = None
     _c_nom = None
 
-    _as_r = None
-    __mesh_size = None
-
     def __init__(self):
         os.chdir(r"C:\temp")
 
     def _save_model(self):
         self._model_database.save()
 
-    def __r_calculate(self):
-        """r calculate method
-        =====================
-
-        Responsible for calculating the radius of the rod in model.
-        Takes /as/ value from class, calculate radius and divide it on two rods
-        """
-        self._as_r = (self._as / np.pi) ** 0.5 / 2
-
     def _materials(self):
         """materials function
         =====================
 
-        Function creating elastic materials with the parameters passed to the class.
+        Function creating elastic materials with the parameters passed to the class. For two materials - main and
+        reinforcement
 
         Parameters:
             1. Young module concrete
@@ -96,8 +85,9 @@ class Model:
         """section create function
         ==========================
 
-        Function responsible for creating section for the models from existing materials
+        Function responsible for creating section for the models from existing materials.
         """
+        as_r = m_functions.r_calculate(self._as)
 
         self._model_parameters.HomogeneousSolidSection(name='Section-concrete',
                                                        material=self._concrete_material_name,
@@ -105,26 +95,26 @@ class Model:
 
         self._model_parameters.TrussSection(name='Section-reinforcement',
                                             material=self._steel_material_name,
-                                            area=self._as_r)
+                                            area=as_r)
 
     def _step_create(self):
         """step create function
         =======================
 
-        Creating step for calculations
+        Creating basic step for calculations, in order to simplify replacement in input file in later steps.
+        Later is replaced by @changeInput
         """
 
         self._model_parameters.StaticStep(name='Step-1', previous='Initial', maxNumInc=10000, initialInc=1,
                                           minInc=1e-10, nlgeom=ON)
 
-    #
-    #
-    # TODO Refactor what lies below, function to another files (divide on creating and editing), check if database exist
-    # Simplify editing model (for faster calculation), Edit parameters of step, documentation!!!
-    #
-    #
-
     def _model_assembly(self):
+        """model_assembly
+        =================
+
+        Function responsible for placing reinforcement rods in the model, and assembly it for calculations
+        """
+
         a1 = self._model_parameters.rootAssembly
         p = self._model_parameters.parts[
             self._reinforcement_part_name.format('1')]
@@ -151,7 +141,13 @@ class Model:
 
         self._save_model()
 
-    def _constraints_set(self):
+    def _constraint_set(self):
+        """constrain_set
+        =================
+
+        Set constraint in order to take into account impact of the reinforcement in model
+        """
+
         a = self._model_parameters.rootAssembly
         e1 = a.instances['SteelRod-1'].edges
         edges1 = e1.getSequenceFromMask(mask=('[#1 ]',), )
@@ -161,20 +157,21 @@ class Model:
         c1 = a.instances['ConcreteCube-1'].cells
         cells1 = c1.getSequenceFromMask(mask=('[#1 ]',), )
         region2 = regionToolset.Region(cells=cells1)
-        self._model_parameters.EmbeddedRegion(name='Constraint-1',
-                                              embeddedRegion=region1,
-                                              hostRegion=region2,
-                                              weightFactorTolerance=1e-06,
-                                              absoluteTolerance=0.0,
-                                              fractionalTolerance=0.05,
-                                              toleranceMethod=BOTH)
-
-    def _mesh_calculation(self):
-        self.__mesh_size = (self._a + self._h) / 2 / 15
+        self._model_parameters.EmbeddedRegion(name='Constraint-1', embeddedRegion=region1, hostRegion=region2,
+                                              weightFactorTolerance=1e-06, absoluteTolerance=0.0,
+                                              fractionalTolerance=0.05, toleranceMethod=BOTH)
 
     def _mesh_set(self):
+        """mesh_set
+        =================
+
+        Creating mesh for parts. Truss element for reinforcement, solid element for concrete
+        """
+
+        mesh_size = m_functions.mesh_calculation(self._a, self._h)
+
         p = self._model_parameters.parts[self._cube_part_name]
-        p.seedPart(size=self.__mesh_size, deviationFactor=0.1, minSizeFactor=0.1)
+        p.seedPart(size=mesh_size, deviationFactor=0.1, minSizeFactor=0.1)
         p.generateMesh()
 
         elemType1 = mesh.ElemType(elemCode=T3D2, elemLibrary=STANDARD)
@@ -184,10 +181,16 @@ class Model:
         edges = e.getSequenceFromMask(mask=('[#1 ]',), )
         pickedRegions = (edges,)
         p.setElementType(regions=pickedRegions, elemTypes=(elemType1,))
-        p.seedPart(size=self.__mesh_size, deviationFactor=0.1, minSizeFactor=0.1)
+        p.seedPart(size=mesh_size, deviationFactor=0.1, minSizeFactor=0.1)
         p.generateMesh()
 
     def _section_assigment(self):
+        """section_assigment
+        ====================
+
+        Assigning section for parts with materials data.
+        """
+
         p = self._model_parameters.parts[self._reinforcement_part_name]
         e = p.edges
         edges = e.getSequenceFromMask(mask=('[#1 ]',), )
@@ -203,10 +206,16 @@ class Model:
                             offsetField='', thicknessAssignment=FROM_SECTION)
 
     def _job_create(self):
+        """job_create
+        =============
+
+        Creating a job in order to write input of the model and later stiffness matrix calculation.
+        """
+
         a = self._model_parameters.rootAssembly
         a.regenerate()
 
-        self._model_database.Job(name='HC-Slab-Job', model=self._model_name,
+        self._model_database.Job(name=self._job_name, model=self._model_name,
                                  description='', type=ANALYSIS,
                                  atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
                                  memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True,
@@ -216,36 +225,38 @@ class Model:
                                  numGPUs=0)
         self._save_model()
 
-    def _job_write_input(self):
-        self._model_database.jobs['HC-Slab-Job'].writeInput(consistencyChecking=OFF)
-        self._model_database.jobs['HC-Slab-Job'].waitForCompletion()
+    def _job_write_and_change_input_calculation(self):
+        """job write and change input calculation
+        =========================================
 
-    def _job_calculate(self):
-        self._model_database.jobs['HC-Slab-Job'].submit(consistencyChecking=OFF)
-        self._model_database.jobs['HC-Slab-Job'].waitForCompletion()
+        Writing input of the file, change step parameters, creating job after input changes and calculating stiffness
+        matrix
+        """
+
+        job_name_changed = const.JOB_NAME_CHANGED
+
+        self._model_database.jobs[self._job_name].writeInput(consistencyChecking=OFF)
+        self._model_database.jobs[self._job_name].waitForCompletion()
+
+        c_input.change_input(self._job_name, job_name_changed)
+
+        del self._model_database.jobs[self._job_name]
+        self._model_database.JobFromInputFile(name=self._job_name,
+                                              inputFileName='C:\\temp\\{}.inp'.format(job_name_changed),
+                                              type=ANALYSIS, atTime=None, waitMinutes=0, waitHours=0, queue=None,
+                                              memory=90, memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True,
+                                              explicitPrecision=SINGLE, nodalOutputPrecision=SINGLE,
+                                              userSubroutine='', scratch='', resultsFormat=ODB,
+                                              multiprocessingMode=DEFAULT, numCpus=1, numGPUs=0)
+
+        self._model_database.jobs[self._job_name].submit(consistencyChecking=OFF)
+        self._model_database.jobs[self._job_name].waitForCompletion()
 
     def _model_delete(self):
         self._model_database.Model(name='Model-1', modelType=STANDARD_EXPLICIT)
         del self._model_parameters
-        del self._model_database.jobs['HC-Slab-Job']
+        del self._model_database.jobs[self._job_name]
 
-    def _check_radius(self):
-        equation = 2 * self._r + 2 * self._c_nom
-
-        if equation > self._a:
-            self._r = (self._a - (2 * self._c_nom)) / 2
-
-    def _check_lagging(self):
-        '''
-        if self._a1 < self._as_r:
-            self._a1 = self._as_r + self._c_nom
-        '''
-
-        if self._a1 * 2 + self._r * 2 + self._l >= self._h:
-            self._l = self._h - (self._a1 * 2 + self._r * 2)
-
-            if self._l < 0:
-                self._l = 0
 
     def save_dimensions(self):
         dimensions = [self._a, self._h, self._r, self._as, self._a1, self._l, self._c_nom]
