@@ -30,7 +30,7 @@ def r_calculate(as_size):
     return as_r
 
 
-def _check_dimensions(r, l, a, a1, h):
+def check_dimensions(r, l, a, a1, h):
     """check dimensions
     ===================
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
     __mesh_size = mesh_calculation(10, 10)
     __r_size = r_calculate(4)
-    __new_r, __new_l = _check_dimensions(10, 10, 5, 2, 15)
+    __new_r, __new_l = check_dimensions(10, 10, 5, 2, 15)
 
     print(__mesh_size)
     print(__r_size)
