@@ -1,9 +1,10 @@
 from odbAccess import *
 from saveResults import *
 from readOdb import *
-from createModel import *
 import os
-from createModel import CreateModel
+from model import Model
+from log import log
+import time
 
 
 class Main:
@@ -15,22 +16,13 @@ class Main:
     __model_database = None
 
     model_object = None
+    __i = None
 
     def __init__(self):
-        self.model_object = CreateModel()
+        self.model_object = Model()
 
     def creating_model(self):
         self.model_object.create_database()
-
-    def read_odb(self):
-        """Read Odb
-        ===========
-
-        Function responsible for reading results from completed job.
-        """
-
-        result = read_odb()
-        self.__results.append(result)
 
     def save_results(self):
         """"Save results
@@ -47,5 +39,6 @@ class Main:
     def read_dimensions(self):
         self.__dimensions.append(self.model_object.save_dimensions())
 
-    def modify_model(self, a, h, a_s, as1, r):
-        self.model_object.dimensions_setter(a, h, a_s, as1, r)
+    def modify_model(self, a, h, a_s, as1, r, l, c_nom):
+        self.__i = self.model_object
+        self.model_object.dimensions_setter(a, h, a_s, as1, r, l, c_nom)

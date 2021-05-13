@@ -9,7 +9,7 @@ def save_to_csv(results_array, name):
     """
 
     try:
-        np.savetxt("%s.csv" % name, results_array, delimiter=" ", fmt='% s')
+        np.savetxt("%s.csv" % name, results_array, delimiter=",", fmt='% s')
 
     except IOError:
         print('Problem with results.csv file')
