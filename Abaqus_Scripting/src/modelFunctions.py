@@ -54,13 +54,15 @@ def check_dimensions(r, l, a, a1, h):
 
     # Checking if l (height of the hole in concrete) isn't too large, if is -> change l
 
-    if 2 * a1 + r * 2 + l >= h:
+    if 2 * a1 + r * 2 + l >= h - 2 * a1:
         l = float(h) - (float(a1) * 2 + float(r) * 2)
 
         if l < 0:
             l = float(0)
 
-    return r, l
+    if 2 * a1 >= a:
+        a1 = a / 2 - 0.001 * a
+    return r, l, a1
 
 
 if __name__ == "__main__":

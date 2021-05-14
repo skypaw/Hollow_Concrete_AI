@@ -45,6 +45,7 @@ class Model:
     _model_database = None  # CEA database
     _model_parameters = None  # database with model name
 
+    _i = None
     _a = None
     _h = None
     _as = None
@@ -55,7 +56,8 @@ class Model:
     def __init__(self):
         os.chdir(r"C:\temp")
 
-    def dimensions_setter(self, a, h, a_s, a1, r, l):
+    def dimensions_setter(self, i, a, h, a_s, a1, r, l):
+        self._i = int(i)
         self._a = a
         self._h = h
         self._as = a_s
@@ -64,12 +66,12 @@ class Model:
         self._l = l
 
     def dimensions_getter(self):
-        return [self._a, self._h, self._as, self._a1, self._r, self._l]
+        return [self._i, self._a, self._h, self._as, self._a1, self._r, self._l]
 
     def check_dimensions(self):
         m_functions.r_calculate(self._as)
         m_functions.mesh_calculation(self._a, self._h)
-        m_functions.check_dimensions(self._r, self._l, self._a, self._a1, self._h)
+        self._r, self._l, self._a1 = m_functions.check_dimensions(self._r, self._l, self._a, self._a1, self._h)
 
     def create_database(self):
         self._create_model_database()
@@ -233,7 +235,7 @@ class Model:
         a = self._model_parameters.rootAssembly
         a.regenerate()
 
-        self._model_database.Job(name=self._job_name, model=self._model_name,
+        self._model_database.Job(name=self._job_name.format(self._i), model=self._model_name,
                                  description='', type=ANALYSIS,
                                  atTime=None, waitMinutes=0, waitHours=0, queue=None, memory=90,
                                  memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True,
@@ -253,24 +255,24 @@ class Model:
 
         job_name_changed = const.JOB_NAME_CHANGED
 
-        self._model_database.jobs[self._job_name].writeInput(consistencyChecking=OFF)
-        self._model_database.jobs[self._job_name].waitForCompletion()
+        self._model_database.jobs[self._job_name.format(self._i)].writeInput(consistencyChecking=OFF)
+        self._model_database.jobs[self._job_name.format(self._i)].waitForCompletion()
 
-        c_input.change_input(self._job_name, job_name_changed)
+        c_input.change_input(self._job_name.format(self._i), job_name_changed.format(self._i))
 
-        del self._model_database.jobs[self._job_name]
-        self._model_database.JobFromInputFile(name=self._job_name,
-                                              inputFileName='C:\\temp\\{}.inp'.format(job_name_changed),
+        del self._model_database.jobs[self._job_name.format(self._i)]
+        self._model_database.JobFromInputFile(name=self._job_name.format(self._i),
+                                              inputFileName='C:\\temp\\{}.inp'.format(job_name_changed.format(self._i)),
                                               type=ANALYSIS, atTime=None, waitMinutes=0, waitHours=0, queue=None,
                                               memory=90, memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True,
                                               explicitPrecision=SINGLE, nodalOutputPrecision=SINGLE,
                                               userSubroutine='', scratch='', resultsFormat=ODB,
                                               multiprocessingMode=DEFAULT, numCpus=1, numGPUs=0)
 
-        self._model_database.jobs[self._job_name].submit(consistencyChecking=OFF)
-        self._model_database.jobs[self._job_name].waitForCompletion()
+        self._model_database.jobs[self._job_name.format(self._i)].submit(consistencyChecking=OFF)
+        self._model_database.jobs[self._job_name.format(self._i)].waitForCompletion()
 
-    def _model_delete(self):
+    def model_delete(self):
         """model delete
         ===============
 
@@ -279,7 +281,7 @@ class Model:
 
         self._model_database.Model(name='Model-1', modelType=STANDARD_EXPLICIT)
         del self._model_parameters
-        del self._model_database.jobs[self._job_name]
+        del self._model_database.jobs[self._job_name.format(self._i)]
 
     def _part_concrete_cube(self):
         """part concrete cube function
@@ -374,7 +376,7 @@ class Model:
         self._model_database = mdb
         self._model_database.saveAs(pathName=self._path)
         self._model_database.models.changeKey(fromName='Model-1', toName=self._model_name)
-        self._model_parameters = self._model_database.models[self._model_name]
+        self._model_parameters = self._model_database.models[self._model_name.format(self._i)]
 
         # Creating model
         self._materials()
