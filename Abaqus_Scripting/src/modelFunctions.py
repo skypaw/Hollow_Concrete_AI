@@ -30,7 +30,7 @@ def r_calculate(as_size):
     return as_r
 
 
-def _check_dimensions(r, l, a, a1, h):
+def check_dimensions(r, l, a, a1, h):
     """check dimensions
     ===================
 
@@ -54,13 +54,15 @@ def _check_dimensions(r, l, a, a1, h):
 
     # Checking if l (height of the hole in concrete) isn't too large, if is -> change l
 
-    if 2 * a1 + r * 2 + l >= h:
+    if 2 * a1 + r * 2 + l >= h - 2 * a1:
         l = float(h) - (float(a1) * 2 + float(r) * 2)
 
         if l < 0:
             l = float(0)
 
-    return r, l
+    if 2 * a1 >= a:
+        a1 = a / 2 - 0.001 * a
+    return r, l, a1
 
 
 if __name__ == "__main__":
@@ -68,7 +70,7 @@ if __name__ == "__main__":
 
     __mesh_size = mesh_calculation(10, 10)
     __r_size = r_calculate(4)
-    __new_r, __new_l = _check_dimensions(10, 10, 5, 2, 15)
+    __new_r, __new_l = check_dimensions(10, 10, 5, 2, 15)
 
     print(__mesh_size)
     print(__r_size)

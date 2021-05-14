@@ -1,27 +1,37 @@
-from main import Main
-import os
+from saveResults import save_to_csv
+# from model import Model
 from log import log
-import numpy as np
-
-cDS = Main()
-
-Main.modify_model(cDS, 0.2,0.25, 0.00226, 0.03, 0.08, 0.02, 0.03)
-Main.read_dimensions(cDS)
-Main.creating_model(cDS)
-Main.read_odb(cDS)
-Main.save_results(cDS)
-Main.save_dimensions(cDS)
+from numpy import linspace
+import subprocess
 
 
-'''
-for a in np.linspace(0.1, 0.18, 8):
-    for h in np.linspace(0.15, 0.5, 10):
-        for r in np.linspace(0.030, 0.061, 10):
-            for l in np.linspace(0, 0.2, 2):
-                Main.modify_model(cDS, a, h, 0.00226, 0.03, r, l, 0.03)
-                Main.read_dimensions(cDS)
-                Main.creating_model(cDS)
-                Main.read_odb(cDS)
-                Main.save_results(cDS)
-                Main.save_dimensions(cDS)
-'''
+def delete_files():
+    pass
+
+
+def call_abdr():
+    pass
+
+
+i = 0
+data = []
+
+for a in linspace(0.1, 0.18, 8):
+    for h in linspace(0.15, 0.5, 10):
+        for a_s in linspace(0.000023, 0.000112, 10):
+            for a1 in linspace(0.02, 0.03, 10):
+                for r in linspace(0.030, 0.061, 10):
+                    for l in linspace(0, 0.2, 5):
+
+                        i += 1
+                        data.append([i, a, h, a_s, a1, r, l])
+
+                        if i % 50 == 0:
+                            save_to_csv(data, 'dataToSubprocess')
+                            subprocess.call("abaqus cae noGUI=abaqusProcess.py", shell=True)
+
+                            delete_files()
+
+                            call_abdr()
+
+                            data = []
