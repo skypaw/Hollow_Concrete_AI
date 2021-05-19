@@ -23,7 +23,7 @@ def change_input(job_name, job_name_changed):
                 output_file.write('**\n** Output Global Stiffness Matrix\n*Step, name=Global_Stiffness_Matrix\n* \
                 MATRIX GENERATE, STIFFNESS\n* MATRIXOUTPUT, STIFFNESS, FORMAT = MATRIXINPUT\n* ENDSTEP\n')
 
-                print('Changed inp')
+                print('Changed inp for {}'.format(job_name))
                 return
 
         warnings.warn("File doesn't contain specific line")
@@ -37,3 +37,9 @@ if __name__ == "__main__":
 
     change_input('test', 'test-s')
     change_input('test-1', 'test-s-1')
+    change_input('Test-One-Element', 'Test-One-Element-C')
+    change_input('Test-Two-Elements', 'Test-Two-Elements-C')
+    change_input('Test-Basic', 'Test-Basic-C')
+    change_input('Test-Basic-Hole', 'Test-Basic-Hole-C')
+    change_input('Test-Advanced', 'Test-Advanced-C')
+    change_input('Test-Advanced-Hole', 'Test-Advanced-Hole-C')
