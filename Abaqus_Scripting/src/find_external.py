@@ -1,39 +1,3 @@
-def reading_ndof(file_name):
-    """reading ndof
-    ===============
-
-    Function responsible for reading ndof from input file.
-
-    :param file_name:
-    :return: ndof_table
-    """
-
-    input_file = open("C:\\temp\\{}.inp".format(file_name))
-
-    ndof_table = []
-
-    is_correct_line = False
-
-    for line in input_file:
-        if line.startswith("*Nset, nset=External"):
-            is_correct_line = True
-
-        if is_correct_line:
-            if not line.startswith("*"):
-                for items in line.split(','):
-                    ndof_table.append(int(items))
-
-        if line.startswith("*Nset, nset=Int_Ext,"):
-            if len(ndof_table) == 3:
-                range_list = []
-                range_list.extend(range(ndof_table[0], ndof_table[1] + 1))
-                return range_list
-
-            return ndof_table
-
-    return 0
-
-
 def get_ndof(table):
     external_ndof = []
     ndofs = 3
@@ -46,7 +10,7 @@ def get_ndof(table):
     return external_ndof
 
 
-def reading_ndof_to_abdr(file_name):
+def reading_nodes(file_name):
     input_file = open("C:\\temp\\{}.inp".format(file_name))
 
     table = []

@@ -181,6 +181,8 @@ class Model:
                                               weightFactorTolerance=1e-06, absoluteTolerance=0.0,
                                               fractionalTolerance=0.05, toleranceMethod=BOTH)
 
+        self._save_model()
+
     def _mesh_set(self):
         """mesh_set
         =================
@@ -204,6 +206,8 @@ class Model:
         p.seedPart(size=mesh_size, deviationFactor=0.1, minSizeFactor=0.1)
         p.generateMesh()
 
+        self._save_model()
+
     def _section_assigment(self):
         """section_assigment
         ====================
@@ -224,6 +228,8 @@ class Model:
         region = regionToolset.Region(cells=cells)
         p.SectionAssignment(region=region, sectionName='Section-concrete', offset=0.0, offsetType=MIDDLE_SURFACE,
                             offsetField='', thicknessAssignment=FROM_SECTION)
+
+        self._save_model()
 
     def _job_create(self):
         """job_create
@@ -271,6 +277,8 @@ class Model:
 
         self._model_database.jobs[self._job_name.format(self._i)].submit(consistencyChecking=OFF)
         self._model_database.jobs[self._job_name.format(self._i)].waitForCompletion()
+
+        self._save_model()
 
     def model_delete(self):
         """model delete
@@ -370,7 +378,6 @@ class Model:
         p.assignBeamSectionOrientation(region=region, method=N1_COSINES, n1=(0.0, 0.0, -1.0))
 
     def _create_model_database(self):
-
         # Creating database and assigning correct name and path
         Mdb()
         self._model_database = mdb
