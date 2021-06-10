@@ -6,7 +6,7 @@ from numpy import genfromtxt
 def call_abaqus():
     cDS = Model()
 
-    file = genfromtxt("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\src\\dataToSubprocess.csv", delimiter=",")
+    file = genfromtxt("..\\resources\\dataToSubprocess.csv", delimiter=",")
     old_dimensions = [0, 0, 0, 0, 0, 0, 0]
 
     for line in file:
