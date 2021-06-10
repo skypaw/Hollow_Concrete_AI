@@ -30,17 +30,12 @@ def reading_nodes(file_name):
                 table.append(table_line)
             del table_line
         if line.startswith("*Element, type="):
+            input_file.close()
             return table
 
+    input_file.close()
     return 0
 
 
 if __name__ == "__main__":
-    table = reading_ndof('Test-Basic')
-    print len(table), table
-
-    external_ndof = get_ndof(table)
-    print len(external_ndof), external_ndof
-
-    table1 = reading_ndof_to_abdr('Test-Basic')
-    print table1
+    print('test')

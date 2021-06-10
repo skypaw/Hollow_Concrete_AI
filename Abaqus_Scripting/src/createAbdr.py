@@ -28,6 +28,8 @@ class CreateAbdr:
 
         matrix_k_ee, matrix_k_ii, matrix_k_ei, matrix_k_ie = self.filtering_matrix(matrix_k, dof_external, dof_internal)
 
+        print(matrix_k_ee.shape, matrix_k_ii.shape)
+
         matrix_k_ = self.calculate_condensed_matrix(matrix_k_ee, matrix_k_ei, matrix_k_ii, matrix_k_ie)
 
         matrix_a_e = self.a_matrix_for_every_external_node(nodes_external_inp, nodes_from_inp)
@@ -39,10 +41,11 @@ class CreateAbdr:
                 if final_matrix_a_k[index_i][index_j] <= 1e-5:
                     final_matrix_a_k[index_i][index_j] = 0
 
-        np.savetxt("abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",", fmt='% s')
-        print 'zapisano {}'.format(self.__file_name)
+            np.savetxt("..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",
+                       fmt='% s')
+            print('zapisano {}'.format(self.__file_name))
 
-        print final_matrix_a_k
+            print(final_matrix_a_k)
 
     def __calculate_area(self, a):
         self.__area = float(a) ** 2
@@ -59,6 +62,7 @@ class CreateAbdr:
                 table.append(line_table)
                 del line_table
 
+            input_file.close()
             return np.array(table)
 
         except IOError:
@@ -114,7 +118,7 @@ class CreateAbdr:
         maxy = max(table_y)
         maxz = max(table_z)
 
-        print maxx, maxy, maxz
+        print(maxx, maxy, maxz)
 
         external_from_file = []
         internal_from_file = []
@@ -191,15 +195,15 @@ class CreateAbdr:
 
     def a0_func(self, x, y, z):
         if self.__ndof == 3:
-            a0 = [[x, 0, y / 2, x * z, 0, y * z / 2, -z / 2, 0],
-                  [0, y, x / 2, 0, y * z, x * z / 2, 0, -z / 2],
-                  [0, 0, 0, (-x) ** 2 / 2, (-y) ** 2 / 2, -x * y / 2, -x / 2, -y / 2]]
+            a0 = [[x, 0, y / 2, z / 2, 0, x * z, 0, y * z / 2],
+                  [0, y, x / 2, 0, z / 2, 0, y * z, x * z / 2],
+                  [0, 0, 0, x / 2, y / 2, -x ** 2 / 2, -y ** 2 / 2, -x * y / 2]]
 
         else:
             a0 = [[x, 0, y / 2, x * z, 0, y * z / 2, -z / 2, 0],
                   [0, y, x / 2, 0, y * z, x * z / 2, 0, -z / 2],
                   [0, 0, 0, (-x) ** 2 / 2, (-y) ** 2 / 2, -x * y / 2, -x / 2, -y / 2],
-                  [0, 0, 0, 0, -y, -x / 2, 0,0],
+                  [0, 0, 0, 0, -y, -x / 2, 0, 0],
                   [0, 0, 0, x, 0, y / 2, -0, 0],
                   [0, 0, 0, 0, 0, 0, 0, 0]]
 

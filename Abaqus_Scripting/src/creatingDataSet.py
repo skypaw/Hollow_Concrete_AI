@@ -27,7 +27,7 @@ for a in linspace(0.1, 0.18, 8):
                         data.append([i, a, h, a_s, a1, r, l])
 
                         if i % 50 == 0:
-                            save_to_csv(data, 'dataToSubprocess')
+                            save_to_csv(data, '..//resources//dataToSubprocess')
                             subprocess.call("abaqus cae noGUI=abaqusProcess.py", shell=True)
 
                             delete_files()
