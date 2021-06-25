@@ -1,15 +1,3 @@
-def get_ndof(table):
-    external_ndof = []
-    ndofs = 3
-
-    for item in table:
-        for item2 in range(1, ndofs + 1):
-            i_index = (item - 1) * ndofs + item2 - 1
-            external_ndof.append(i_index)
-
-    return external_ndof
-
-
 def reading_nodes(file_name):
     input_file = open("C:\\temp\\{}.inp".format(file_name))
 
@@ -29,12 +17,13 @@ def reading_nodes(file_name):
             if not table_line == []:
                 table.append(table_line)
             del table_line
-        if line.startswith("*Element, type="):
+
+        if line.startswith("*Element"):
             input_file.close()
             return table
 
     input_file.close()
-    return 0
+    return None
 
 
 if __name__ == "__main__":
