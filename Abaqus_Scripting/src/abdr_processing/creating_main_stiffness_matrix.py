@@ -1,5 +1,5 @@
 from scipy.sparse import csr_matrix
-from read_files import *
+from read_files import read_mtx
 
 
 def calculate_index(mtx_indexes, number_of_ndofs):

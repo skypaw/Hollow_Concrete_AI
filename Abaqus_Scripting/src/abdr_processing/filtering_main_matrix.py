@@ -1,3 +1,5 @@
+import numpy as np
+from read_files import reading_inp_file
 
 def make_rotation(table_to_abdr, table_rotation):
     translation = table_rotation[0]
@@ -38,24 +40,21 @@ def make_rotation(table_to_abdr, table_rotation):
 
 
 
-def calculate_dofs(ext_int, number_of_ndof):
+def calculate_dofs(ext_int, number_of_dofs):
     mtx_dof = []
     for node in ext_int:
-        ndof_index = node * number_of_ndof
-        for nodes in range(number_of_ndof):
+        ndof_index = node * number_of_dofs
+        for nodes in range(number_of_dofs):
             mtx_dof.append(ndof_index + nodes)
     return np.array(mtx_dof)
 
 
 
-def nodes_location(file_name):
+def nodes_location(file_name, number_of_dofs):
     table_to_abdr, table_rotation = reading_inp_file(file_name)
 
     table_to_abdr = np.array(table_to_abdr)
-
-
-
-    table_to_abdr = make_rotation(table_to_abdr)
+    table_to_abdr = make_rotation(table_to_abdr,table_rotation)
 
     table_n = table_to_abdr[:, 0]
 
@@ -98,8 +97,8 @@ def nodes_location(file_name):
         else:
             internal_from_file.append(index_number)
 
-    mtx_external_dof = calculate_dofs(external_from_file)
-    mtx_internal_dof = calculate_dofs(internal_from_file)
+    mtx_external_dof = calculate_dofs(external_from_file, number_of_dofs)
+    mtx_internal_dof = calculate_dofs(internal_from_file,number_of_dofs)
 
     '''for node in range(len(table_to_abdr)):
         table_to_abdr[node][1] = table_to_abdr[node][1] - diff_x / 2  # X Axis

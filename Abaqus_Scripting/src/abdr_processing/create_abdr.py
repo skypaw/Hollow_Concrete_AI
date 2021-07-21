@@ -2,7 +2,8 @@ from scipy.sparse import csr_matrix
 import matplotlib.pylab as plt
 import numpy as np
 from read_files import *
-from creating_main_stiffness_matrix import *
+from creating_main_stiffness_matrix import creating_global_matrix
+from filtering_main_matrix import nodes_location
 from warnings import warn
 import matplotlib.pyplot as plt
 
@@ -22,7 +23,9 @@ class CreateAbdr:
         self.__matrix_k = creating_global_matrix(self.__file_name, self.__ndof)
         print self.__matrix_k.shape
 
-        dof_external, dof_internal, nodes_external_inp, nodes_correction = self.nodes_location()
+
+
+        dof_external, dof_internal, nodes_external_inp, nodes_correction = nodes_location(self.__file_name, self.__ndof)
 
         matrix_k_ee = self.filtering_matrix(dof_external, dof_external)
         matrix_k_ii = self.filtering_matrix(dof_internal, dof_internal)
@@ -30,6 +33,7 @@ class CreateAbdr:
         matrix_k_ie = self.filtering_matrix(dof_internal, dof_external)
 
         print(matrix_k_ee.shape, matrix_k_ei.shape, matrix_k_ie.shape, matrix_k_ii.shape)
+
 
         matrix_k_ = self.calculate_condensed_matrix(matrix_k_ee, matrix_k_ei, matrix_k_ii, matrix_k_ie)
         print (matrix_k_.shape)
@@ -44,12 +48,13 @@ class CreateAbdr:
                 if final_matrix_a_k[i][j] <= 1e-5:
                     final_matrix_a_k[i][j] = 0
 
-        np.savetxt("..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",
+        np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",
                    fmt='% s')
 
-        self.nodes_graph(nodes_correction, 'CorrectNodes')
+        #self.nodes_graph(nodes_correction, 'CorrectNodes')
         # print('zapisano {}'.format(self.__file_name))
         # print(final_matrix_a_k)
+
 
     def __calculate_area(self, a):
         self.__area = float(a) ** 2
@@ -69,130 +74,6 @@ class CreateAbdr:
         plt.title('{}'.format(title))
         plt.show()
 
-    def make_rotation(self, table_to_abdr):
-
-        translation = [0.15, 0.5, 0.]
-
-        table_to_abdr[:, 1] = table_to_abdr[:, 1] + translation[0]
-        table_to_abdr[:, 2] = table_to_abdr[:, 2] + translation[1]
-        table_to_abdr[:, 3] = table_to_abdr[:, 3] + translation[2]
-
-        rotation = [0.15, 0.5, 0., 1.15000001268805, 0.5, 0., 89.9999992730282]
-
-        r1 = rotation[0:3]
-        r1 = rotation[3:6]
-        print r1
-
-        #r1 = np.array([-5.00000001268805, -4., 1.755])
-
-        angle = np.deg2rad(rotation[6])
-
-        T = [[1, 0, 0],
-             [0, np.cos(angle), np.sin(angle)],
-             [0, -np.sin(angle), np.cos(angle)]]
-
-        srodGlob = r1
-        for i in range(len(table_to_abdr)):
-            punkt0glob = table_to_abdr[i][1:]
-            punkt0lok = np.array(srodGlob) * -1 + punkt0glob
-
-            punkt1lok = np.matmul(np.array(T), np.transpose(punkt0lok))
-            punkt1Glob = np.transpose(punkt1lok) + r1
-            table_to_abdr[i][1:] = punkt1Glob
-
-        return table_to_abdr
-
-    def nodes_location(self):
-
-        table_to_abdr, table_rotation = reading_inp_file(self.__file_name)
-
-        table_to_abdr = np.array(table_to_abdr)
-
-        #########################################################
-        fig = plt.figure()
-        fig.add_axes()
-        ax = fig.gca(projection='3d')
-        X = table_to_abdr[:, 1]
-        Y = table_to_abdr[:, 2]
-        Z = table_to_abdr[:, 3]
-
-        ax.scatter(X, Y, Z)
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        ax.set_zlabel('z')
-        plt.title('{}'.format('Nodes before correction'))
-        plt.show()
-        #####################################
-
-        table_to_abdr = self.make_rotation(table_to_abdr)
-
-        table_n = table_to_abdr[:, 0]
-
-        table_x = table_to_abdr[:, 1]
-        table_y = table_to_abdr[:, 2]
-        table_z = table_to_abdr[:, 3]
-
-        #########################################################
-        fig = plt.figure()
-        fig.add_axes()
-        ax = fig.gca(projection='3d')
-        X = table_x
-        Y = table_y
-        Z = table_z
-
-        ax.scatter(X, Y, Z)
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        ax.set_zlabel('z')
-        plt.title('{}'.format('Nodes after basic correction'))
-        plt.show()
-        #####################################
-
-        maxx = max(table_x)
-        maxy = max(table_y)
-        maxz = max(table_z)
-
-        minx = min(table_x)
-        miny = min(table_y)
-        minz = min(table_z)
-
-        print(maxx, maxy, maxz)
-        print(minx, miny, minz)
-
-        diff_x = abs(maxx - minx)
-        diff_y = abs(maxy - miny)
-        diff_z = abs(maxz - minz)
-
-        print (diff_x, diff_y, diff_z)
-
-        table_x = table_x - minx - diff_x / 2
-        table_y = table_y - miny - diff_y / 2
-
-        external_from_file = []
-        internal_from_file = []
-
-        for index in range(len(table_to_abdr)):
-            index_number = int(table_n[index] - 1)
-
-            index_x = table_x[index]
-            index_y = table_y[index]
-
-            if abs(index_x - diff_x / 2) <= 1e-4 or abs(index_y - diff_y / 2) <= 1e-4 \
-                    or abs(index_x + diff_x / 2) <= 1e-4 or abs(index_y + diff_y / 2) <= 1e-4:
-                external_from_file.append(index_number)
-            else:
-                internal_from_file.append(index_number)
-
-        mtx_external_dof = self.calculate_dofs(external_from_file)
-        mtx_internal_dof = self.calculate_dofs(internal_from_file)
-
-        '''for node in range(len(table_to_abdr)):
-            table_to_abdr[node][1] = table_to_abdr[node][1] - diff_x / 2  # X Axis
-            table_to_abdr[node][2] = table_to_abdr[node][2] - abs(diff_y) / 2  # Y Axis
-
-            table_to_abdr[node][3] = table_to_abdr[node][3] - abs(diff_z) / 2  # Z Axis
-        '''
-        return mtx_external_dof, mtx_internal_dof, np.array(external_from_file), table_to_abdr
 
     def spy_graphs(self, spy_matrix):
         """spy graphs
@@ -259,6 +140,6 @@ if __name__ == "__main__":
 
     # CreateAbdr('Test-Advanced-Hole', 0.2,3)
     # CreateAbdr('Test-Basic-Hole', 0.2,3)
-    # CreateAbdr('bianco', 8.0, 6)
+    CreateAbdr('bianco', 8.0, 6)
     # CreateAbdr('bianco-srodek', 8.0, 6)
-    CreateAbdr('Dwuteownik', 0.3873, 6)
+

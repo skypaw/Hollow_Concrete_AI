@@ -27,18 +27,22 @@ def reading_inp_file(file_name):
 
             # Bool statements to navigate in the file
 
-            if line.startswith("*Part, name=Concrete-Cube") or line.startswith("*Part, name=Part-1"):
+            if line.startswith("*Part, name=Concrete-Cube") or line.startswith("*Part, name=P"):
                 is_main_part = True
+                continue
 
-            if line.startswith("*Instance, name=ConcreteCube-1") or line.startswith("*Instance, name=Part-1-1"):
+            if line.startswith("*Instance, name=ConcreteCube-1") or line.startswith("*Instance, name=P"):
                 is_assembly_line = True
+                continue
 
             if line.startswith("*Node"):
                 is_node_line = True
+                continue
 
             if line.startswith("*Element"):
                 is_node_line = False
                 is_main_part = False
+                continue
 
             # Creating lists of elements
 
@@ -51,7 +55,7 @@ def reading_inp_file(file_name):
             if is_assembly_line and line.startswith("*End Instance"):
                 return table_nodes, table_rotation_assembly
 
-    warn("Failed to read file 'C:\\temp\\{}-C_STIF1.mtx".format(file_name))
+    warn("Failed to read file")
     return None
 
 
@@ -66,5 +70,5 @@ def read_mtx(file_name):
 
 
 if __name__ == "__main__":
-    print(reading_inp_file("Job-1"))
-    print(read_mtx("Dwuteownik"))
+    print(reading_inp_file("bianco-saw"))
+
