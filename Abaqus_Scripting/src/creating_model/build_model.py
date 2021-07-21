@@ -2,8 +2,8 @@ import os
 from abaqus import *
 from abaqusConstants import *
 import numpy as np
-import constantValues as const
-import changeInput as c_input
+import constant_values as const
+import change_input as c_input
 import __main__
 import section
 import regionToolset
@@ -23,7 +23,7 @@ import xyPlot
 import displayGroupOdbToolset as dgo
 import connectorBehavior
 
-import modelFunctions as m_functions
+import model_functions as m_functions
 
 
 class Model:
@@ -135,6 +135,9 @@ class Model:
         Function responsible for placing reinforcement rods in the model, and assembly it for calculations
         """
 
+        a = self._model_parameters.rootAssembly
+        a.DatumCsysByDefault(CARTESIAN)
+
         a1 = self._model_parameters.rootAssembly
         p = self._model_parameters.parts[
             self._reinforcement_part_name.format('1')]
@@ -158,6 +161,15 @@ class Model:
         a1 = self._model_parameters.rootAssembly
         a1.translate(instanceList=('SteelRod-1',), vector=(self._a - self._a1, self._a1, 0.0))
         a1.translate(instanceList=('SteelRod-2',), vector=(self._a1, self._a1, 0.0))
+
+
+        a1 = self._model_parameters.rootAssembly
+        a1.rotate(instanceList=('SteelRod-1', 'SteelRod-2', 'ConcreteCube-1'),
+                  axisPoint=(0.0, 0.0, 0.0), axisDirection=(10.0, 0.0, 0.0), angle=90.0)
+        a1 = self._model_parameters.rootAssembly
+
+        a1.translate(instanceList=('SteelRod-1', 'SteelRod-2', 'ConcreteCube-1'),
+                     vector=(0.0, self._a, 0.0))
 
         self._save_model()
 

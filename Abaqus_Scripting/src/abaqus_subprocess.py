@@ -1,4 +1,4 @@
-from model import Model
+from creating_model.build_model import Model
 from log import log
 from numpy import genfromtxt
 

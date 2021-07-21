@@ -1,11 +1,10 @@
 from scipy.sparse import csr_matrix
 import matplotlib.pylab as plt
 import numpy as np
-from find_external import *
+from read_files import *
 from warnings import warn
 import matplotlib.pyplot as plt
-import pylab
-from mpl_toolkits.mplot3d import Axes3D
+
 
 
 class CreateAbdr:
@@ -34,7 +33,6 @@ class CreateAbdr:
         print (matrix_k_.shape)
 
         matrix_a_e = self.a_matrix_for_every_external_node(nodes_external_inp, nodes_correction)
-
         final_matrix_a_k = np.matmul(np.matmul(np.transpose(matrix_a_e), matrix_k_), matrix_a_e) / self.__area
 
         # self.spy_graphs(self.__matrix_k)
@@ -59,8 +57,8 @@ class CreateAbdr:
         fig.add_axes()
         ax = fig.gca(projection='3d')
         X = node_list[:, 1]
-        Y = node_list[:, 3]
-        Z = node_list[:, 2]
+        Y = node_list[:, 2]
+        Z = node_list[:, 3]
 
         ax.scatter(X, Y, Z)
         ax.set_xlabel('x')
@@ -69,27 +67,8 @@ class CreateAbdr:
         plt.title('{}'.format(title))
         plt.show()
 
-    def read_mtx(self):
-        table = []
-        try:
-            input_file = open('C:\\temp\\{}-C_STIF1.mtx'.format(self.__file_name))
-            for line in input_file:
-                line_table = []
-                for items in line.split(','):
-                    line_table.append(float(items))
-
-                table.append(line_table)
-                del line_table
-
-            input_file.close()
-            return np.array(table)
-
-        except IOError:
-            warn("Failed to open 'C:\\temp\\{}-C_STIF1.mtx".format(self.__file_name))
-            return None
-
     def split_data(self):
-        mtx_data_from_file = self.read_mtx()
+        mtx_data_from_file = read_mtx(self.__file_name)
 
         index_table = mtx_data_from_file[:, 0:4]
         data_table = mtx_data_from_file[:, 4]
@@ -139,18 +118,84 @@ class CreateAbdr:
                 mtx_dof.append(ndof_index + nodes)
         return np.array(mtx_dof)
 
+    def make_rotation(self, table_to_abdr):
+
+        translation = [0.15, 0.5, 0.]
+
+        table_to_abdr[:, 1] = table_to_abdr[:, 1] + translation[0]
+        table_to_abdr[:, 2] = table_to_abdr[:, 2] + translation[1]
+        table_to_abdr[:, 3] = table_to_abdr[:, 3] + translation[2]
+
+        rotation = [0.15, 0.5, 0., 1.15000001268805, 0.5, 0., 89.9999992730282]
+
+        r1 = rotation[0:3]
+        r1 = rotation[3:6]
+        print r1
+
+        #r1 = np.array([-5.00000001268805, -4., 1.755])
+
+        angle = np.deg2rad(rotation[6])
+
+        T = [[1, 0, 0],
+             [0, np.cos(angle), np.sin(angle)],
+             [0, -np.sin(angle), np.cos(angle)]]
+
+        srodGlob = r1
+        for i in range(len(table_to_abdr)):
+            punkt0glob = table_to_abdr[i][1:]
+            punkt0lok = np.array(srodGlob) * -1 + punkt0glob
+
+            punkt1lok = np.matmul(np.array(T), np.transpose(punkt0lok))
+            punkt1Glob = np.transpose(punkt1lok) + r1
+            table_to_abdr[i][1:] = punkt1Glob
+
+        return table_to_abdr
+
     def nodes_location(self):
 
-        table_to_abdr = reading_nodes(self.__file_name)
+        table_to_abdr, table_rotation = reading_inp_file(self.__file_name)
+
         table_to_abdr = np.array(table_to_abdr)
+
+        #########################################################
+        fig = plt.figure()
+        fig.add_axes()
+        ax = fig.gca(projection='3d')
+        X = table_to_abdr[:, 1]
+        Y = table_to_abdr[:, 2]
+        Z = table_to_abdr[:, 3]
+
+        ax.scatter(X, Y, Z)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        plt.title('{}'.format('Nodes before correction'))
+        plt.show()
+        #####################################
+
+        table_to_abdr = self.make_rotation(table_to_abdr)
 
         table_n = table_to_abdr[:, 0]
 
         table_x = table_to_abdr[:, 1]
-        table_y = table_to_abdr[:, 3] * -1.0
-        table_z = table_to_abdr[:, 2]
+        table_y = table_to_abdr[:, 2]
+        table_z = table_to_abdr[:, 3]
 
-        self.nodes_graph(table_to_abdr, 'NodesBeforeCorrecting')
+        #########################################################
+        fig = plt.figure()
+        fig.add_axes()
+        ax = fig.gca(projection='3d')
+        X = table_x
+        Y = table_y
+        Z = table_z
+
+        ax.scatter(X, Y, Z)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        plt.title('{}'.format('Nodes after basic correction'))
+        plt.show()
+        #####################################
 
         maxx = max(table_x)
         maxy = max(table_y)
@@ -163,8 +208,14 @@ class CreateAbdr:
         print(maxx, maxy, maxz)
         print(minx, miny, minz)
 
-        table_x = table_x - maxx / 2
-        table_y = table_y - miny / 2
+        diff_x = abs(maxx - minx)
+        diff_y = abs(maxy - miny)
+        diff_z = abs(maxz - minz)
+
+        print (diff_x, diff_y, diff_z)
+
+        table_x = table_x - minx - diff_x / 2
+        table_y = table_y - miny - diff_y / 2
 
         external_from_file = []
         internal_from_file = []
@@ -175,22 +226,21 @@ class CreateAbdr:
             index_x = table_x[index]
             index_y = table_y[index]
 
-            if abs(index_x - maxx / 2) <= 1e-5 or abs(index_y - miny / 2) <= 1e-5 \
-                    or abs(index_x + maxx / 2) <= 1e-5 or abs(index_y + miny / 2) <= 1e-5:
+            if abs(index_x - diff_x / 2) <= 1e-4 or abs(index_y - diff_y / 2) <= 1e-4 \
+                    or abs(index_x + diff_x / 2) <= 1e-4 or abs(index_y + diff_y / 2) <= 1e-4:
                 external_from_file.append(index_number)
-
             else:
                 internal_from_file.append(index_number)
 
         mtx_external_dof = self.calculate_dofs(external_from_file)
         mtx_internal_dof = self.calculate_dofs(internal_from_file)
 
-        for node in range(len(table_to_abdr)):
-            table_to_abdr[node][1] = table_to_abdr[node][1] - maxx / 2  # X Axis
-            table_to_abdr[node][3] = table_to_abdr[node][3] * (-1) + abs(miny) / 2  # Y Axis
+        '''for node in range(len(table_to_abdr)):
+            table_to_abdr[node][1] = table_to_abdr[node][1] - diff_x / 2  # X Axis
+            table_to_abdr[node][2] = table_to_abdr[node][2] - abs(diff_y) / 2  # Y Axis
 
-            table_to_abdr[node][2] = table_to_abdr[node][2] - maxz / 2  # Z Axis
-
+            table_to_abdr[node][3] = table_to_abdr[node][3] - abs(diff_z) / 2  # Z Axis
+        '''
         return mtx_external_dof, mtx_internal_dof, np.array(external_from_file), table_to_abdr
 
     def spy_graphs(self, spy_matrix):
@@ -229,7 +279,7 @@ class CreateAbdr:
 
             a0 = [[x, 0, y / 2, x * z, 0, y * z / 2, (-z) / 2, 0],
                   [0, y, x / 2, 0, y * z, x * z / 2, 0, (-z) / 2],
-                  [0, 0, 0, ((-x) ** 2) / 2, ((-y) ** 2) / 2, (-x * y) / 2, (-x) / 2, (-y) / 2],
+                  [0, 0, 0, (-x) ** 2 / 2, (-y) ** 2 / 2, (-x) * y / 2, (-x) / 2, (-y) / 2],
 
                   [0, 0, 0, 0, -y, (-x) / 2, 0, 0],
                   [0, 0, 0, x, 0, y / 2, 0, 0],
@@ -241,9 +291,9 @@ class CreateAbdr:
         abdr = []
         for items in table_to_abdr:
             if int(items[0] - 1) in table_ndof:
-                a0 = self.__a0_func(items[1], items[3], items[2])
-                for items2 in a0:
-                    abdr.append(np.array(items2))
+                a0 = self.__a0_func(float(items[1]), float(items[2]), float(items[3]))
+
+                abdr.extend(a0)
         return abdr
 
     def filtering_matrix(self, i_ndof, j_ndof):
@@ -258,4 +308,6 @@ if __name__ == "__main__":
 
     # CreateAbdr('Test-Advanced-Hole', 0.2,3)
     # CreateAbdr('Test-Basic-Hole', 0.2,3)
-    CreateAbdr('bianco', 8.0, 6)
+    # CreateAbdr('bianco', 8.0, 6)
+    # CreateAbdr('bianco-srodek', 8.0, 6)
+    CreateAbdr('Dwuteownik', 0.3873, 6)

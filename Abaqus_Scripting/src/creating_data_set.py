@@ -1,4 +1,4 @@
-from saveResults import save_to_csv
+from abdr_processing.save_results import save_to_csv
 # from model import Model
 from log import log
 from numpy import linspace
@@ -28,7 +28,7 @@ for a in linspace(0.1, 0.18, 8):
 
                         if i % 50 == 0:
                             save_to_csv(data, '..//resources//dataToSubprocess')
-                            subprocess.call("abaqus cae noGUI=abaqusProcess.py", shell=True)
+                            subprocess.call("abaqus cae noGUI=abaqus_subprocess.py", shell=True)
 
                             delete_files()
 
