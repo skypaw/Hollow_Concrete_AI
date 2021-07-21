@@ -15,12 +15,12 @@ def append_items_to_table(line, table_to_return):
 
 
 def reading_inp_file(file_name):
-    table_nodes = []
-    table_rotation_assembly = []
-
     is_main_part = False
     is_node_line = False
     is_assembly_line = False
+
+    table_nodes = []
+    table_rotation_assembly = []
 
     with open("C:\\temp\\{}.inp".format(file_name)) as input_file:
         for line in input_file:
@@ -57,13 +57,12 @@ def reading_inp_file(file_name):
 
 def read_mtx(file_name):
     sparse_matrix_table = []
+
     with open('C:\\temp\\{}-C_STIF1.mtx'.format(file_name)) as input_file:
         for line in input_file:
             append_items_to_table(line, sparse_matrix_table)
 
-        input_file.close()
         return np.array(sparse_matrix_table)
-
 
 
 if __name__ == "__main__":

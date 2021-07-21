@@ -2,6 +2,7 @@ from scipy.sparse import csr_matrix
 import matplotlib.pylab as plt
 import numpy as np
 from read_files import *
+from creating_main_stiffness_matrix import *
 from warnings import warn
 import matplotlib.pyplot as plt
 
@@ -18,9 +19,10 @@ class CreateAbdr:
         self.__calculate_area(a)
         self.__ndof = int(ndof)
 
-        dof_external, dof_internal, nodes_external_inp, nodes_correction = self.nodes_location()
-        self.__matrix_k = self.creating_global_matrix()
+        self.__matrix_k = creating_global_matrix(self.__file_name, self.__ndof)
         print self.__matrix_k.shape
+
+        dof_external, dof_internal, nodes_external_inp, nodes_correction = self.nodes_location()
 
         matrix_k_ee = self.filtering_matrix(dof_external, dof_external)
         matrix_k_ii = self.filtering_matrix(dof_internal, dof_internal)
@@ -66,57 +68,6 @@ class CreateAbdr:
         ax.set_zlabel('z')
         plt.title('{}'.format(title))
         plt.show()
-
-    def split_data(self):
-        mtx_data_from_file = read_mtx(self.__file_name)
-
-        index_table = mtx_data_from_file[:, 0:4]
-        data_table = mtx_data_from_file[:, 4]
-        return index_table, data_table
-
-    def calculate_index(self, mtx_indexes):
-        i_table = []
-        j_table = []
-
-        for line in range(len(mtx_indexes)):
-            a = mtx_indexes[line][0]
-            b = mtx_indexes[line][1]
-            c = mtx_indexes[line][2]
-            d = mtx_indexes[line][3]
-
-            i_index = (a - 1) * self.__ndof + b - 1
-            j_index = (c - 1) * self.__ndof + d - 1
-
-            i_table.append(int(round(i_index, 0)))
-            j_table.append(int(round(j_index, 0)))
-
-        return i_table, j_table
-
-    def creating_global_matrix(self):
-        mtx_indices, mtx_data = self.split_data()
-        i_mtx_index, j_mtx_index = self.calculate_index(mtx_indices)
-
-        array_bottom = csr_matrix((mtx_data, (i_mtx_index, j_mtx_index)))
-        array_top = csr_matrix((mtx_data, (j_mtx_index, i_mtx_index)))
-
-        global_stiff_matrix = (array_bottom + array_top).toarray()
-
-        length = global_stiff_matrix.shape[0]
-
-        for i in range(length):
-            for j in range(length):
-                if i == j:
-                    global_stiff_matrix[i, j] = global_stiff_matrix[i, j] / 2
-
-        return global_stiff_matrix
-
-    def calculate_dofs(self, ext_int):
-        mtx_dof = []
-        for node in ext_int:
-            ndof_index = node * self.__ndof
-            for nodes in range(self.__ndof):
-                mtx_dof.append(ndof_index + nodes)
-        return np.array(mtx_dof)
 
     def make_rotation(self, table_to_abdr):
 
