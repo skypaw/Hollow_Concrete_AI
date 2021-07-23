@@ -48,6 +48,7 @@ def reading_inp_file(file_name):
 
             if is_node_line and is_main_part:
                 append_items_to_table(line, table_nodes)
+                continue
 
             if is_assembly_line:
                 append_items_to_table(line, table_rotation_assembly)

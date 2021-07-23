@@ -1,12 +1,7 @@
-from scipy.sparse import csr_matrix
 import matplotlib.pylab as plt
 import numpy as np
-from read_files import *
 from creating_main_stiffness_matrix import creating_global_matrix
 from filtering_main_matrix import nodes_location
-from warnings import warn
-import matplotlib.pyplot as plt
-
 
 
 class CreateAbdr:
@@ -21,9 +16,7 @@ class CreateAbdr:
         self.__ndof = int(ndof)
 
         self.__matrix_k = creating_global_matrix(self.__file_name, self.__ndof)
-        print self.__matrix_k.shape
-
-
+        print self.__matrix_k.shape, "Shape of the Main Matrix"
 
         dof_external, dof_internal, nodes_external_inp, nodes_correction = nodes_location(self.__file_name, self.__ndof)
 
@@ -32,11 +25,10 @@ class CreateAbdr:
         matrix_k_ei = self.filtering_matrix(dof_external, dof_internal)
         matrix_k_ie = self.filtering_matrix(dof_internal, dof_external)
 
-        print(matrix_k_ee.shape, matrix_k_ei.shape, matrix_k_ie.shape, matrix_k_ii.shape)
-
+        print(matrix_k_ee.shape, matrix_k_ei.shape, matrix_k_ie.shape, matrix_k_ii.shape), "Shape of the Sub Matricies"
 
         matrix_k_ = self.calculate_condensed_matrix(matrix_k_ee, matrix_k_ei, matrix_k_ii, matrix_k_ie)
-        print (matrix_k_.shape)
+        print (matrix_k_.shape), "Shape of the Condensed Matrix"
 
         matrix_a_e = self.a_matrix_for_every_external_node(nodes_external_inp, nodes_correction)
         final_matrix_a_k = np.matmul(np.matmul(np.transpose(matrix_a_e), matrix_k_), matrix_a_e) / self.__area
@@ -51,10 +43,9 @@ class CreateAbdr:
         np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",
                    fmt='% s')
 
-        #self.nodes_graph(nodes_correction, 'CorrectNodes')
+        # self.nodes_graph(nodes_correction, 'CorrectNodes')
         # print('zapisano {}'.format(self.__file_name))
         # print(final_matrix_a_k)
-
 
     def __calculate_area(self, a):
         self.__area = float(a) ** 2
@@ -73,7 +64,6 @@ class CreateAbdr:
         ax.set_zlabel('z')
         plt.title('{}'.format(title))
         plt.show()
-
 
     def spy_graphs(self, spy_matrix):
         """spy graphs
@@ -105,17 +95,17 @@ class CreateAbdr:
         if self.__ndof == 3:
             a0 = [[x, 0, y / 2, x * z, 0, y * z / 2, (-z) / 2, 0],
                   [0, y, x / 2, 0, y * z, x * z / 2, 0, (-z) / 2],
-                  [0, 0, 0, ((-x) ** 2) / 2, ((-y) ** 2) / 2, (-x * y) / 2, (-x) / 2, (-y) / 2]]
+                  [0, 0, 0, ((-x) ** 2) / 2, ((-y) ** 2) / 2, (-x * y) / 2, (-x) / 2, (-y) / 2],]
 
         else:
 
-            a0 = [[x, 0, y / 2, x * z, 0, y * z / 2, (-z) / 2, 0],
-                  [0, y, x / 2, 0, y * z, x * z / 2, 0, (-z) / 2],
-                  [0, 0, 0, (-x) ** 2 / 2, (-y) ** 2 / 2, (-x) * y / 2, (-x) / 2, (-y) / 2],
+            a0 = [[x, 0, (y / 2), (x * z),          0,             (y * z / 2),    (-z / 2),         0        ],
+                  [0, y, (x / 2),       0,         (y * z),        (x * z / 2),       0,          (-z / 2) ],
+                  [0, 0, 0,      (-x ** 2 / 2), (-y ** 2 / 2), (-x * y / 2), (-x / 2),     (-y / 2)],
 
-                  [0, 0, 0, 0, -y, (-x) / 2, 0, 0],
-                  [0, 0, 0, x, 0, y / 2, 0, 0],
-                  [0, 0, 0, 0, 0, 0, 0, 0]]
+                  [0, 0, 0,      0,                 -y,            (-x / 2),         0,           0],
+                  [0, 0, 0,      x,                   0,              (y / 2),           0,           0],
+                  [0, 0, 0,      0,                   0,                  0,              0,           0],]
 
         return np.array(a0)
 
@@ -140,6 +130,6 @@ if __name__ == "__main__":
 
     # CreateAbdr('Test-Advanced-Hole', 0.2,3)
     # CreateAbdr('Test-Basic-Hole', 0.2,3)
-    CreateAbdr('bianco', 8.0, 6)
-    # CreateAbdr('bianco-srodek', 8.0, 6)
-
+    # CreateAbdr('Rura', 8.0, 3)
+    # CreateAbdr('Dwuteownik', 8.0, 6)
+    CreateAbdr('bianco-saw595-ax', 8.0, 6)

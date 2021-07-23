@@ -26,7 +26,7 @@ def change_input(job_name, job_name_changed):
                 print('Changed inp for {}'.format(job_name))
                 return
 
-        warnings.warn("File doesn't contain specific line")
+        warnings.warn("File doesn't contain specific line - Step")
 
     except IOError:
         warnings.warn("File C:\\temp\\{}.inp doesn't exist)".format(job_name))
@@ -46,4 +46,5 @@ if __name__ == "__main__":
     change_input('bianco-srodek', 'bianco-srodek-C')
     change_input('Dwuteownik', 'Dwuteownik-C')
     change_input('Skrzynka', 'Skrzynka-C')
+    change_input('Rura', 'Rura-C')
 

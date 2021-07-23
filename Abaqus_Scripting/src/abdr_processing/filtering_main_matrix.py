@@ -1,23 +1,71 @@
 import numpy as np
 from read_files import reading_inp_file
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+
+def make_translation(to_translate, direction, translation):
+    to_translate[:, direction] = to_translate[:, direction] - translation
+    return to_translate[:, direction]
+
 
 def make_rotation(table_to_abdr, table_rotation):
     translation = table_rotation[0]
     rotation = table_rotation[1]
 
-    table_to_abdr[:, 1] = table_to_abdr[:, 1] + translation[0]
-    table_to_abdr[:, 2] = table_to_abdr[:, 2] + translation[1]
-    table_to_abdr[:, 3] = table_to_abdr[:, 3] + translation[2]
+    print translation, rotation, 'ROTATION TRANSLA'
+
+    fig = plt.figure()
+    fig.add_axes()
+    ax = fig.gca(projection='3d')
+    table_x = table_to_abdr[:, 1]
+    table_y = table_to_abdr[:, 2]
+    table_z = table_to_abdr[:, 3]
+
+    maxx = max(table_x)
+    maxy = max(table_y)
+    maxz = max(table_z)
+
+    minx = min(table_x)
+    miny = min(table_y)
+    minz = min(table_z)
+
+    ax.scatter(table_x, table_y, table_z)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.title('{}'.format('Nodes before correction'))
+    plt.show()
+
+    if not maxx == abs(minx):
+        pass
+        #table_x = make_translation(table_to_abdr, 1, 0)
+    if not maxy == abs(miny):
+        pass
+        #table_y = make_translation(table_to_abdr, 2, 0)
+    if not maxz == abs(minz):
+        table_z = make_translation(table_to_abdr, 3, -3.8)
+
+    fig = plt.figure()
+    fig.add_axes()
+    ax = fig.gca(projection='3d')
+    ax.scatter(table_x, table_y, table_z)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.title('{}'.format('Nodes after translation'))
+    plt.show()
+
 
     r1 = rotation[0:3]
     r1 = rotation[3:6]
     print r1
 
-    # r1 = np.array([-5.00000001268805, -4., 1.755])
+    r1 = np.array([-1., 0.,3.8])
 
     angle = np.deg2rad(rotation[6])
 
-    if (angle >= 0):
+    if (angle <= 0):
         T = [[1, 0, 0],
              [0, np.cos(angle), -np.sin(angle)],
              [0, np.sin(angle), np.cos(angle)]]
@@ -35,9 +83,33 @@ def make_rotation(table_to_abdr, table_rotation):
         punkt1Glob = np.transpose(punkt1lok) + r1
         table_to_abdr[i][1:] = punkt1Glob
 
+    fig = plt.figure()
+    fig.add_axes()
+    ax = fig.gca(projection='3d')
+    ax.scatter(table_x, table_y, table_z)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.title('{}'.format('Nodes after rotation'))
+    plt.show()
+
+
+    table_y = make_translation(table_to_abdr, 2, 4)
+    table_x = make_translation(table_to_abdr, 1, 4)
+    table_z = make_translation(table_to_abdr, 3, 1.755+0.290)
+
+
+    fig = plt.figure()
+    fig.add_axes()
+    ax = fig.gca(projection='3d')
+    ax.scatter(table_x, table_y, table_z)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.title('{}'.format('Nodes translation to center'))
+    plt.show()
+
     return table_to_abdr
-
-
 
 
 def calculate_dofs(ext_int, number_of_dofs):
@@ -49,12 +121,11 @@ def calculate_dofs(ext_int, number_of_dofs):
     return np.array(mtx_dof)
 
 
-
 def nodes_location(file_name, number_of_dofs):
     table_to_abdr, table_rotation = reading_inp_file(file_name)
 
     table_to_abdr = np.array(table_to_abdr)
-    table_to_abdr = make_rotation(table_to_abdr,table_rotation)
+    table_to_abdr = make_rotation(table_to_abdr, table_rotation)
 
     table_n = table_to_abdr[:, 0]
 
@@ -70,7 +141,7 @@ def nodes_location(file_name, number_of_dofs):
     miny = min(table_y)
     minz = min(table_z)
 
-    print(maxx, maxy, maxz)
+    print(maxx, maxy, maxz) , "Max values"
     print(minx, miny, minz)
 
     diff_x = abs(maxx - minx)
@@ -98,12 +169,6 @@ def nodes_location(file_name, number_of_dofs):
             internal_from_file.append(index_number)
 
     mtx_external_dof = calculate_dofs(external_from_file, number_of_dofs)
-    mtx_internal_dof = calculate_dofs(internal_from_file,number_of_dofs)
+    mtx_internal_dof = calculate_dofs(internal_from_file, number_of_dofs)
 
-    '''for node in range(len(table_to_abdr)):
-        table_to_abdr[node][1] = table_to_abdr[node][1] - diff_x / 2  # X Axis
-        table_to_abdr[node][2] = table_to_abdr[node][2] - abs(diff_y) / 2  # Y Axis
-
-        table_to_abdr[node][3] = table_to_abdr[node][3] - abs(diff_z) / 2  # Z Axis
-    '''
     return mtx_external_dof, mtx_internal_dof, np.array(external_from_file), table_to_abdr
