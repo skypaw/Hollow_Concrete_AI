@@ -7,6 +7,7 @@ from pyDOE2 import lhs
 
 import matplotlib.pyplot as plt
 
+
 def delete_files(step, batch_size):
     txt = genfromtxt("C:\\temp\\dataToSubprocess.csv", delimiter=",")
     for line in txt:
@@ -50,19 +51,46 @@ def call_abdr():
 
 
 def create_data_to_subprocess():
-    i = 0
     data = []
-    for a in linspace(0.1, 0.18, 8):
-        for h in linspace(0.15, 0.5, 8):
-            for a_s in linspace(0.000023, 0.000112, 4):
-                for a1 in linspace(0.02, 0.03, 2):
-                    for r in linspace(0.030, 0.061, 10):
-                        for l in linspace(0, 0.2, 4):
-                            i += 1
-                            data.append([i, a, h, a_s, a1, r, l])
+    i = 0
 
+    lhs_list = lhs(6, 12000, criterion='center')
 
-    #lhs()
+    a_start = 0.1
+    a_end = 0.18
+    a_interval = a_end - a_start
+
+    h_start = 0.15
+    h_end = 0.5
+    h_interval = h_end - h_start
+
+    a_s_start = 0.000023
+    a_s_end = 0.000112
+    a_s_interval = a_s_end - a_s_start
+
+    a1_start = 0.02
+    a1_end = 0.03
+    a1_interval = a1_end - a1_start
+
+    r_start = 0.03
+    r_end = 0.061
+    r_interval = r_end - r_start
+
+    l_start = 0
+    l_end = 0.2
+    l_interval = l_end - l_start
+
+    for dimensions in lhs_list:
+        i += 1
+
+        a = dimensions[0] * a_interval + a_start
+        h = dimensions[1] * h_interval + h_start
+        a_s = dimensions[2] * a_s_interval + a_s_start
+        a1 = dimensions[3] * a1_interval + a1_start
+        r = dimensions[4] * r_interval + r_start
+        l = dimensions[5] * l_interval + l_start
+        data.append([i, a, h, a_s, a1, r, l])
+
     save_to_csv(data, '..\\resources\\dataToSubprocess')
 
 
@@ -73,8 +101,6 @@ def calculate(batch_size):
         if i % batch_size == 0:
             with open("..\\resources\\temp_step") as step:
                 step.write(i)
-
-            
 
             call_abdr()
             delete_files(i, 100)
@@ -99,23 +125,6 @@ def calculate(batch_size):
 
 if __name__ == "__main__":
     # calculate()
-    #create_data_to_subprocess()
+    create_data_to_subprocess()
     # call_abdr()
     # delete_files()
-
-    
-    """
-    test =  lhs(10, 6)
-    for i in test:
-        print i
-
-        fig = plt.figure()
-        fig.add_axes()
-        ax = fig.gca()
-
-
-        ax.scatter(i, range(0,10))
-        ax.set_xlabel('x')
-        ax.set_ylabel('y')
-        plt.title('{}'.format('Nodes before correction'))
-        plt.show()"""
