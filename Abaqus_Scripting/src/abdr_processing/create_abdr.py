@@ -31,21 +31,24 @@ class CreateAbdr:
         print (matrix_k_.shape), "Shape of the Condensed Matrix"
 
         matrix_a_e = self.a_matrix_for_every_external_node(nodes_external_inp, nodes_correction)
-        final_matrix_a_k = np.matmul(np.matmul(np.transpose(matrix_a_e), matrix_k_), matrix_a_e) / self.__area
+        self.final_matrix_a_k = np.matmul(np.matmul(np.transpose(matrix_a_e), matrix_k_), matrix_a_e) / self.__area
 
         # self.spy_graphs(self.__matrix_k)
 
-        for i in range(len(final_matrix_a_k)):
-            for j in range(len(final_matrix_a_k)):
-                if final_matrix_a_k[i][j] <= 1e-5:
-                    final_matrix_a_k[i][j] = 0
+        for i in range(len(self.final_matrix_a_k)):
+            for j in range(len(self.final_matrix_a_k)):
+                if self.final_matrix_a_k[i][j] <= 1e-5:
+                    self.final_matrix_a_k[i][j] = 0
 
-        np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",
-                   fmt='% s')
+        #np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",fmt='% s')
 
         # self.nodes_graph(nodes_correction, 'CorrectNodes')
         # print('zapisano {}'.format(self.__file_name))
         # print(final_matrix_a_k)
+
+
+    def get_results(self):
+        return np.array(self.final_matrix_a_k)
 
     def __calculate_area(self, a):
         self.__area = float(a) ** 2
@@ -95,17 +98,17 @@ class CreateAbdr:
         if self.__ndof == 3:
             a0 = [[x, 0, y / 2, x * z, 0, y * z / 2, (-z) / 2, 0],
                   [0, y, x / 2, 0, y * z, x * z / 2, 0, (-z) / 2],
-                  [0, 0, 0, ((-x) ** 2) / 2, ((-y) ** 2) / 2, (-x * y) / 2, (-x) / 2, (-y) / 2],]
+                  [0, 0, 0, (-x ** 2) / 2, (-y ** 2) / 2, -x * y / 2, (-x) / 2, (-y) / 2], ]
 
         else:
 
-            a0 = [[x, 0, (y / 2), (x * z),          0,             (y * z / 2),    (-z / 2),         0        ],
-                  [0, y, (x / 2),       0,         (y * z),        (x * z / 2),       0,          (-z / 2) ],
-                  [0, 0, 0,      (-x ** 2 / 2), (-y ** 2 / 2), (-x * y / 2), (-x / 2),     (-y / 2)],
+            a0 = [[x, 0, (y / 2), (x * z), 0, (y * z / 2), (-z / 2), 0],
+                  [0, y, (x / 2), 0, (y * z), (x * z / 2), 0, (-z / 2)],
+                  [0, 0, 0, (-x ** 2 / 2), (-y ** 2 / 2), (-x * y / 2), (-x / 2), (-y / 2)],
 
-                  [0, 0, 0,      0,                 -y,            (-x / 2),         0,           0],
-                  [0, 0, 0,      x,                   0,              (y / 2),           0,           0],
-                  [0, 0, 0,      0,                   0,                  0,              0,           0],]
+                  [0, 0, 0, 0, -y, (-x / 2), 0, 0],
+                  [0, 0, 0, x, 0, (y / 2), 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0], ]
 
         return np.array(a0)
 
@@ -128,8 +131,8 @@ if __name__ == "__main__":
     # CreateAbdr('Test-Two-Elements', 0.2,3)
     # CreateAbdr('Test-Two-Elements-Same-Stiffness-Reinforcement', 0.2,3)
 
-    # CreateAbdr('Test-Advanced-Hole', 0.2,3)
-    # CreateAbdr('Test-Basic-Hole', 0.2,3)
-    # CreateAbdr('Rura', 8.0, 3)
-    # CreateAbdr('Dwuteownik', 8.0, 6)
+    #CreateAbdr('Test-Advanced-Hole', 0.2,3)
+    CreateAbdr('Job-1', 0.2,3)
+
+    #CreateAbdr('Dwuteownik', 8.0, 6)
     CreateAbdr('bianco-saw595-ax', 8.0, 6)

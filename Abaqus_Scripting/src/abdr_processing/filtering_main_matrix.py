@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def make_translation(to_translate, direction, translation):
-    to_translate[:, direction] = to_translate[:, direction] - translation
+    to_translate[:, direction] = to_translate[:, direction] + translation
     return to_translate[:, direction]
 
 
@@ -15,20 +15,13 @@ def make_rotation(table_to_abdr, table_rotation):
 
     print translation, rotation, 'ROTATION TRANSLA'
 
-    fig = plt.figure()
-    fig.add_axes()
-    ax = fig.gca(projection='3d')
     table_x = table_to_abdr[:, 1]
     table_y = table_to_abdr[:, 2]
     table_z = table_to_abdr[:, 3]
 
-    maxx = max(table_x)
-    maxy = max(table_y)
-    maxz = max(table_z)
-
-    minx = min(table_x)
-    miny = min(table_y)
-    minz = min(table_z)
+    fig = plt.figure()
+    fig.add_axes()
+    ax = fig.gca(projection='3d')
 
     ax.scatter(table_x, table_y, table_z)
     ax.set_xlabel('x')
@@ -37,14 +30,9 @@ def make_rotation(table_to_abdr, table_rotation):
     plt.title('{}'.format('Nodes before correction'))
     plt.show()
 
-    if not maxx == abs(minx):
-        pass
-        #table_x = make_translation(table_to_abdr, 1, 0)
-    if not maxy == abs(miny):
-        pass
-        #table_y = make_translation(table_to_abdr, 2, 0)
-    if not maxz == abs(minz):
-        table_z = make_translation(table_to_abdr, 3, -3.8)
+    table_x = make_translation(table_to_abdr, 1, translation[0])
+    table_y = make_translation(table_to_abdr, 2,translation[1])
+    table_z = make_translation(table_to_abdr, 3, translation[2])
 
     fig = plt.figure()
     fig.add_axes()
@@ -56,16 +44,12 @@ def make_rotation(table_to_abdr, table_rotation):
     plt.title('{}'.format('Nodes after translation'))
     plt.show()
 
-
-    r1 = rotation[0:3]
     r1 = rotation[3:6]
     print r1
-
-    r1 = np.array([-1., 0.,3.8])
-
     angle = np.deg2rad(rotation[6])
+    print angle*r1[0]
 
-    if (angle <= 0):
+    if (angle*r1[0] >= 0):
         T = [[1, 0, 0],
              [0, np.cos(angle), -np.sin(angle)],
              [0, np.sin(angle), np.cos(angle)]]
@@ -93,11 +77,14 @@ def make_rotation(table_to_abdr, table_rotation):
     plt.title('{}'.format('Nodes after rotation'))
     plt.show()
 
+    maxx = max(table_x)
+    maxy = max(table_y)
+    maxz = max(table_z)
+    minz = min(table_z)
 
-    table_y = make_translation(table_to_abdr, 2, 4)
-    table_x = make_translation(table_to_abdr, 1, 4)
-    table_z = make_translation(table_to_abdr, 3, 1.755+0.290)
-
+    table_x = make_translation(table_to_abdr, 1, -maxx / 2)
+    table_y = make_translation(table_to_abdr, 2, -maxy / 2)
+    table_z = make_translation(table_to_abdr, 3, -(abs(maxz)+abs(minz)) / 2)
 
     fig = plt.figure()
     fig.add_axes()
@@ -141,8 +128,8 @@ def nodes_location(file_name, number_of_dofs):
     miny = min(table_y)
     minz = min(table_z)
 
-    print(maxx, maxy, maxz) , "Max values"
-    print(minx, miny, minz)
+    print(maxx, maxy, maxz), "Max values"
+    print(minx, miny, minz), "min val"
 
     diff_x = abs(maxx - minx)
     diff_y = abs(maxy - miny)

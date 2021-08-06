@@ -24,27 +24,23 @@ def change_input(job_name, job_name_changed):
                 MATRIX GENERATE, STIFFNESS\n* MATRIXOUTPUT, STIFFNESS, FORMAT = MATRIXINPUT\n* ENDSTEP\n')
 
                 print('Changed inp for {}'.format(job_name))
+
+                input_file.close()
+                output_file.close()
                 return
 
         warnings.warn("File doesn't contain specific line - Step")
+
+        input_file.close()
+        output_file.close()
 
     except IOError:
         warnings.warn("File C:\\temp\\{}.inp doesn't exist)".format(job_name))
 
 
+
 if __name__ == "__main__":
     print("Testing of the input")
 
-    #change_input('test', 'test-s')
-    #change_input('test-1', 'test-s-1')
-    change_input('Test-Basic-Hole', 'Test-Basic-Hole-C')
-    #change_input('Test-Advanced', 'Test-Advanced-C')
-    change_input('Test-Advanced-Hole', 'Test-Advanced-Hole-C')
-    change_input('Test-Two-Elements-Same-Stiffness-Reinforcement', 'Test-Two-Elements-Same-Stiffness-Reinforcement-C')
-    change_input('Test-Two-Elements', 'Test-Two-Elements-C')
-    change_input('bianco', 'bianco-C')
-    change_input('bianco-srodek', 'bianco-srodek-C')
-    change_input('Dwuteownik', 'Dwuteownik-C')
-    change_input('Skrzynka', 'Skrzynka-C')
     change_input('Rura', 'Rura-C')
 
