@@ -193,6 +193,7 @@ class Model:
                                               weightFactorTolerance=1e-06, absoluteTolerance=0.0,
                                               fractionalTolerance=0.05, toleranceMethod=BOTH)
 
+
         self._save_model()
 
     def _mesh_set(self):
@@ -408,6 +409,7 @@ class Model:
         self._model_assembly()
         self._mesh_set()
         self._section_assigment()
+        self._constraint_set()
 
         self._job_write_and_change_input_calculation()
         self._save_model()

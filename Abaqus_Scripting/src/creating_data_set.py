@@ -1,6 +1,6 @@
 from abdr_processing.save_results import save_to_csv
 from abdr_processing.create_abdr import CreateAbdr
-from numpy import linspace, genfromtxt
+from numpy import genfromtxt
 import subprocess
 import os
 from pyDOE2 import lhs
@@ -9,11 +9,14 @@ import matplotlib.pyplot as plt
 
 
 def delete_files(step, batch_size):
-    txt = genfromtxt("C:\\temp\\dataToSubprocess.csv", delimiter=",")
+    txt = genfromtxt("..\\resources\\dataToSubprocess.csv", delimiter=",")
     for line in txt:
-        if not int(line[0]) == step - batch_size:
+        if float(line[0]) < step:
             continue
-        elif int(line[0]) >= step - batch_size:
+        if float(line[0]) > step + batch_size:
+            break
+
+        if float(line[0]) < step + batch_size:
             try:
                 os.remove("C:\\temp\\Job-{}.inp".format(int(line[0])))
                 os.remove("C:\\temp\\Job-{}-C.inp".format(int(line[0])))
@@ -24,37 +27,47 @@ def delete_files(step, batch_size):
                 os.remove("C:\\temp\\Job-{}-C.odb".format(int(line[0])))
                 os.remove("C:\\temp\\Job-{}-C.msg".format(int(line[0])))
                 os.remove("C:\\temp\\Job-{}-C.dat".format(int(line[0])))
-                os.remove("C:\\temp\\Job-{}-C_X1.sim".format(int(line[0])))
-                os.remove("C:\\temp\\Job-{}-C_X1.sim".format(int(line[0])))
-                os.remove("C:\\temp\\Job-{}-C.log".format(int(line[0])))
-                os.remove("C:\\temp\\Job-{}-C.sim".format(int(line[0])))
 
             except:
-                print "Error with removing"
-        elif int(line[0]) == step:
+                print "Error with removing Job-{}".format(int(line[0]))
+
+
+def call_abdr(step, batch_size):
+    txt = genfromtxt("..\\resources\\dataToSubprocess.csv", delimiter=",")
+
+    savedata_mian = []
+
+    for model_data in txt:
+        if model_data[0] < step:
+            continue
+        if model_data[0] >= step + batch_size:
             break
 
-
-def call_abdr():
-    txt = genfromtxt("C:\\temp\\dataToSubprocess.csv", delimiter=",")
-    savedata = []
-    for model_data in txt:
-        if os.path.exists("C:\\temp\\Job-{}-C.inp".format(int(model_data[0]))):
+        if os.path.exists("C:\\temp\\Job-{}-C.inp".format(int(step))):
             try:
-                c = CreateAbdr("Job-{}".format(int(model_data[0])), model_data[1], 3)
-                savedata.extend([model_data[1:], CreateAbdr.get_results(c)])
-                save_to_csv(savedata, "C:\\temp\\batch_results")
-            except:
-                print ("Problem with Job-{}".format(int(model_data[0])))
+                savedata = []
+                c = CreateAbdr("Job-{}".format(int(step)), model_data[1], 3)
 
-    save_to_csv(savedata, "C:\\temp\\batch_results")
+                for datadata in model_data:
+                    savedata.append(datadata)
+
+                data2 = CreateAbdr.get_results(c)
+                for datadatadatar in data2:
+                    savedata.append(datadatadatar)
+
+                # save_to_csv(savedata, "C:\\temp\\batch_results{}".format(step))
+                savedata_mian.append(savedata)
+            except:
+                print ("Problem with Job-{}".format(int(step)))
+
+    save_to_csv(savedata_mian, "C:\\temp\\batch_results{}".format(step))
 
 
 def create_data_to_subprocess():
     data = []
     i = 0
 
-    lhs_list = lhs(6, 12000, criterion='center')
+    lhs_list = lhs(6, 24000, criterion='center')
 
     a_start = 0.1
     a_end = 0.18
@@ -81,7 +94,6 @@ def create_data_to_subprocess():
     l_interval = l_end - l_start
 
     for dimensions in lhs_list:
-        i += 1
 
         a = dimensions[0] * a_interval + a_start
         h = dimensions[1] * h_interval + h_start
@@ -89,42 +101,50 @@ def create_data_to_subprocess():
         a1 = dimensions[3] * a1_interval + a1_start
         r = dimensions[4] * r_interval + r_start
         l = dimensions[5] * l_interval + l_start
+
+        if 2 * r + 0.01 >= a:
+            continue
+
+        if 2 * a1 + r * 2 + l + 0.01 >= h - 2 * a1:
+            continue
+
+        if 2 * a1 + 0.01 >= a:
+            continue
+
+        i += 1
+
         data.append([i, a, h, a_s, a1, r, l])
 
     save_to_csv(data, '..\\resources\\dataToSubprocess')
 
 
-def calculate(batch_size):
-    i = 1
+def calculate():
+    # todo:move batch size -> batch size for now in step.txt
+
+    file_csv = genfromtxt("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\dataToSubprocess.csv", delimiter=",")
+
+    with open("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\step.txt", "r") as file:
+        data = []
+        for line in file:
+            data.append(float(line))
+
+        step, batch = data
+
     try:
-        subprocess.call("abaqus cae noGUI=abaqus_subprocess.py", shell=True)
-        if i % batch_size == 0:
-            with open("..\\resources\\temp_step") as step:
-                step.write(i)
+        while step in file_csv[:, 0]:
+            subprocess.call("abaqus cae noGUI=abaqus_subprocess.py", shell=True)
 
-            call_abdr()
-            delete_files(i, 100)
+            call_abdr(step, data[1])
+            delete_files(step, data[1])
 
-
+            step += batch
 
     except:
-        print "test"
-        with open("..\\resources\\temp_step") as step:
-            step.write(i)
-
-    """if i % 1500 == 0:
-        save_to_csv(data, 'C:\\temp\\dataToSubprocess')
-        
-
-        call_abdr()
-
-        # delete_files()
-        data = []
-    """
+        print ("problem with step {}".format(step))
 
 
 if __name__ == "__main__":
-    # calculate()
-    create_data_to_subprocess()
+    calculate()
+    # create_data_to_subprocess()
     # call_abdr()
     # delete_files()

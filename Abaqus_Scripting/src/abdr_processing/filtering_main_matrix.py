@@ -19,7 +19,7 @@ def make_rotation(table_to_abdr, table_rotation):
     table_y = table_to_abdr[:, 2]
     table_z = table_to_abdr[:, 3]
 
-    fig = plt.figure()
+    """fig = plt.figure()
     fig.add_axes()
     ax = fig.gca(projection='3d')
 
@@ -28,13 +28,13 @@ def make_rotation(table_to_abdr, table_rotation):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.title('{}'.format('Nodes before correction'))
-    plt.show()
+    plt.show()"""
 
     table_x = make_translation(table_to_abdr, 1, translation[0])
     table_y = make_translation(table_to_abdr, 2,translation[1])
     table_z = make_translation(table_to_abdr, 3, translation[2])
 
-    fig = plt.figure()
+    """fig = plt.figure()
     fig.add_axes()
     ax = fig.gca(projection='3d')
     ax.scatter(table_x, table_y, table_z)
@@ -42,7 +42,7 @@ def make_rotation(table_to_abdr, table_rotation):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.title('{}'.format('Nodes after translation'))
-    plt.show()
+    plt.show()"""
 
     r1 = rotation[3:6]
     print r1
@@ -67,7 +67,7 @@ def make_rotation(table_to_abdr, table_rotation):
         punkt1Glob = np.transpose(punkt1lok) + r1
         table_to_abdr[i][1:] = punkt1Glob
 
-    fig = plt.figure()
+    """fig = plt.figure()
     fig.add_axes()
     ax = fig.gca(projection='3d')
     ax.scatter(table_x, table_y, table_z)
@@ -75,7 +75,7 @@ def make_rotation(table_to_abdr, table_rotation):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.title('{}'.format('Nodes after rotation'))
-    plt.show()
+    plt.show()"""
 
     maxx = max(table_x)
     maxy = max(table_y)
@@ -86,7 +86,7 @@ def make_rotation(table_to_abdr, table_rotation):
     table_y = make_translation(table_to_abdr, 2, -maxy / 2)
     table_z = make_translation(table_to_abdr, 3, -(abs(maxz)+abs(minz)) / 2)
 
-    fig = plt.figure()
+    """fig = plt.figure()
     fig.add_axes()
     ax = fig.gca(projection='3d')
     ax.scatter(table_x, table_y, table_z)
@@ -94,7 +94,7 @@ def make_rotation(table_to_abdr, table_rotation):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.title('{}'.format('Nodes translation to center'))
-    plt.show()
+    plt.show()"""
 
     return table_to_abdr
 
@@ -118,24 +118,19 @@ def nodes_location(file_name, number_of_dofs):
 
     table_x = table_to_abdr[:, 1]
     table_y = table_to_abdr[:, 2]
-    table_z = table_to_abdr[:, 3]
 
     maxx = max(table_x)
     maxy = max(table_y)
-    maxz = max(table_z)
 
     minx = min(table_x)
     miny = min(table_y)
-    minz = min(table_z)
 
-    print(maxx, maxy, maxz), "Max values"
-    print(minx, miny, minz), "min val"
+
+    """print(maxx, maxy, maxz), "Max values"
+    print(minx, miny, minz), "min val"""
 
     diff_x = abs(maxx - minx)
     diff_y = abs(maxy - miny)
-    diff_z = abs(maxz - minz)
-
-    print (diff_x, diff_y, diff_z)
 
     table_x = table_x - minx - diff_x / 2
     table_y = table_y - miny - diff_y / 2

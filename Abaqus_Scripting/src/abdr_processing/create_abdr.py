@@ -40,15 +40,27 @@ class CreateAbdr:
                 if self.final_matrix_a_k[i][j] <= 1e-5:
                     self.final_matrix_a_k[i][j] = 0
 
-        #np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",fmt='% s')
+        #np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), self.final_matrix_a_k, delimiter=",",fmt='% s')
 
         # self.nodes_graph(nodes_correction, 'CorrectNodes')
         # print('zapisano {}'.format(self.__file_name))
         # print(final_matrix_a_k)
+        print "End of calculation"
 
 
     def get_results(self):
-        return np.array(self.final_matrix_a_k)
+        a11  =self.final_matrix_a_k[0,0]
+        a22  =self.final_matrix_a_k[1,1]
+        a12  =self.final_matrix_a_k[0,1]
+        a33  =self.final_matrix_a_k[2,2]
+        d11  =self.final_matrix_a_k[3,3]
+        d22  =self.final_matrix_a_k[4,4]
+        d12  =self.final_matrix_a_k[3,4]
+        d33  =self.final_matrix_a_k[5,5]
+        a44  =self.final_matrix_a_k[6,6]
+        a55  =self.final_matrix_a_k[7,7]
+
+        return np.array([a11,a22,a12,a33,d11,d22,d12,d33,a44,a55])
 
     def __calculate_area(self, a):
         self.__area = float(a) ** 2
@@ -132,7 +144,7 @@ if __name__ == "__main__":
     # CreateAbdr('Test-Two-Elements-Same-Stiffness-Reinforcement', 0.2,3)
 
     #CreateAbdr('Test-Advanced-Hole', 0.2,3)
-    CreateAbdr('Job-1', 0.2,3)
+    #CreateAbdr('Job-1', 0.2,3)
 
     #CreateAbdr('Dwuteownik', 8.0, 6)
     CreateAbdr('bianco-saw595-ax', 8.0, 6)
