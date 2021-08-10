@@ -24,6 +24,7 @@ import displayGroupOdbToolset as dgo
 import connectorBehavior
 
 import model_functions as m_functions
+from log import log
 
 
 class Model:
@@ -56,7 +57,7 @@ class Model:
     def __init__(self):
         os.chdir(r"C:\temp")
 
-    def dimensions_setter(self, i, a, h, a_s, a1, r, l):
+    def set_dimensions(self, i, a, h, a_s, a1, r, l):
         self._i = int(i)
         self._a = a
         self._h = h
@@ -65,7 +66,7 @@ class Model:
         self._r = r
         self._l = l
 
-    def dimensions_getter(self):
+    def get_dimensions(self):
         return [self._i, self._a, self._h, self._as, self._a1, self._r, self._l]
 
     def check_dimensions(self):
@@ -162,7 +163,6 @@ class Model:
         a1.translate(instanceList=('SteelRod-1',), vector=(self._a - self._a1, self._a1, 0.0))
         a1.translate(instanceList=('SteelRod-2',), vector=(self._a1, self._a1, 0.0))
 
-
         a1 = self._model_parameters.rootAssembly
         a1.rotate(instanceList=('SteelRod-1', 'SteelRod-2', 'ConcreteCube-1'),
                   axisPoint=(0.0, 0.0, 0.0), axisDirection=(10.0, 0.0, 0.0), angle=90.0)
@@ -192,6 +192,7 @@ class Model:
         self._model_parameters.EmbeddedRegion(name='Constraint-1', embeddedRegion=region1, hostRegion=region2,
                                               weightFactorTolerance=1e-06, absoluteTolerance=0.0,
                                               fractionalTolerance=0.05, toleranceMethod=BOTH)
+
 
         self._save_model()
 
@@ -279,7 +280,7 @@ class Model:
         c_input.change_input(self._job_name.format(self._i), job_name_changed.format(self._i))
 
         del self._model_database.jobs[self._job_name.format(self._i)]
-        self._model_database.JobFromInputFile(name=self._job_name.format(self._i),
+        self._model_database.JobFromInputFile(name=job_name_changed.format(self._i),
                                               inputFileName='C:\\temp\\{}.inp'.format(job_name_changed.format(self._i)),
                                               type=ANALYSIS, atTime=None, waitMinutes=0, waitHours=0, queue=None,
                                               memory=90, memoryUnits=PERCENTAGE, getMemoryFromAnalysis=True,
@@ -287,8 +288,8 @@ class Model:
                                               userSubroutine='', scratch='', resultsFormat=ODB,
                                               multiprocessingMode=DEFAULT, numCpus=1, numGPUs=0)
 
-        self._model_database.jobs[self._job_name.format(self._i)].submit(consistencyChecking=OFF)
-        self._model_database.jobs[self._job_name.format(self._i)].waitForCompletion()
+        self._model_database.jobs[job_name_changed.format(self._i)].submit(consistencyChecking=OFF)
+        self._model_database.jobs[job_name_changed.format(self._i)].waitForCompletion()
 
         self._save_model()
 
@@ -408,5 +409,7 @@ class Model:
         self._model_assembly()
         self._mesh_set()
         self._section_assigment()
+        self._constraint_set()
+
         self._job_write_and_change_input_calculation()
         self._save_model()

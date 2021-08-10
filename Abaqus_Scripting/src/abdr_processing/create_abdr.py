@@ -6,14 +6,19 @@ from filtering_main_matrix import nodes_location
 
 class CreateAbdr:
     __file_name = None
+    __a = None
     __area = None
     __ndof = None
     __matrix_k = None
 
-    def __init__(self, file_name, a, ndof):
-        self.__file_name = file_name
-        self.__calculate_area(a)
-        self.__ndof = int(ndof)
+    def __init__(self):
+        print ("Init ABDR object")
+
+    def calculate_abdr(self):
+        self.__calculate_area(self.__a)
+
+        print self.__file_name, self.__a, self.__area
+
 
         self.__matrix_k = creating_global_matrix(self.__file_name, self.__ndof)
         print self.__matrix_k.shape, "Shape of the Main Matrix"
@@ -31,21 +36,40 @@ class CreateAbdr:
         print (matrix_k_.shape), "Shape of the Condensed Matrix"
 
         matrix_a_e = self.a_matrix_for_every_external_node(nodes_external_inp, nodes_correction)
-        final_matrix_a_k = np.matmul(np.matmul(np.transpose(matrix_a_e), matrix_k_), matrix_a_e) / self.__area
+        self.final_matrix_a_k = np.matmul(np.matmul(np.transpose(matrix_a_e), matrix_k_), matrix_a_e) / self.__area
 
         # self.spy_graphs(self.__matrix_k)
 
-        for i in range(len(final_matrix_a_k)):
-            for j in range(len(final_matrix_a_k)):
-                if final_matrix_a_k[i][j] <= 1e-5:
-                    final_matrix_a_k[i][j] = 0
+        for i in range(len(self.final_matrix_a_k)):
+            for j in range(len(self.final_matrix_a_k)):
+                if self.final_matrix_a_k[i][j] <= 1e-5:
+                    self.final_matrix_a_k[i][j] = 0
 
-        np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), final_matrix_a_k, delimiter=",",
-                   fmt='% s')
+        # np.savetxt("..//..//resources//abdr-{}.csv".format(self.__file_name), self.final_matrix_a_k, delimiter=",",fmt='% s')
 
         # self.nodes_graph(nodes_correction, 'CorrectNodes')
         # print('zapisano {}'.format(self.__file_name))
         # print(final_matrix_a_k)
+        print "End of calculation"
+
+    def set_data(self, file_name, a, ndof):
+        self.__file_name = file_name
+        self.__a = a
+        self.__ndof = int(ndof)
+
+    def get_results(self):
+        a11 = self.final_matrix_a_k[0, 0]
+        a22 = self.final_matrix_a_k[1, 1]
+        a12 = self.final_matrix_a_k[0, 1]
+        a33 = self.final_matrix_a_k[2, 2]
+        d11 = self.final_matrix_a_k[3, 3]
+        d22 = self.final_matrix_a_k[4, 4]
+        d12 = self.final_matrix_a_k[3, 4]
+        d33 = self.final_matrix_a_k[5, 5]
+        a44 = self.final_matrix_a_k[6, 6]
+        a55 = self.final_matrix_a_k[7, 7]
+
+        return np.array([a11, a22, a12, a33, d11, d22, d12, d33, a44, a55])
 
     def __calculate_area(self, a):
         self.__area = float(a) ** 2
@@ -95,17 +119,17 @@ class CreateAbdr:
         if self.__ndof == 3:
             a0 = [[x, 0, y / 2, x * z, 0, y * z / 2, (-z) / 2, 0],
                   [0, y, x / 2, 0, y * z, x * z / 2, 0, (-z) / 2],
-                  [0, 0, 0, ((-x) ** 2) / 2, ((-y) ** 2) / 2, (-x * y) / 2, (-x) / 2, (-y) / 2],]
+                  [0, 0, 0, (-x ** 2) / 2, (-y ** 2) / 2, -x * y / 2, (-x) / 2, (-y) / 2], ]
 
         else:
 
-            a0 = [[x, 0, (y / 2), (x * z),          0,             (y * z / 2),    (-z / 2),         0        ],
-                  [0, y, (x / 2),       0,         (y * z),        (x * z / 2),       0,          (-z / 2) ],
-                  [0, 0, 0,      (-x ** 2 / 2), (-y ** 2 / 2), (-x * y / 2), (-x / 2),     (-y / 2)],
+            a0 = [[x, 0, (y / 2), (x * z), 0, (y * z / 2), (-z / 2), 0],
+                  [0, y, (x / 2), 0, (y * z), (x * z / 2), 0, (-z / 2)],
+                  [0, 0, 0, (-x ** 2 / 2), (-y ** 2 / 2), (-x * y / 2), (-x / 2), (-y / 2)],
 
-                  [0, 0, 0,      0,                 -y,            (-x / 2),         0,           0],
-                  [0, 0, 0,      x,                   0,              (y / 2),           0,           0],
-                  [0, 0, 0,      0,                   0,                  0,              0,           0],]
+                  [0, 0, 0, 0, -y, (-x / 2), 0, 0],
+                  [0, 0, 0, x, 0, (y / 2), 0, 0],
+                  [0, 0, 0, 0, 0, 0, 0, 0], ]
 
         return np.array(a0)
 
@@ -129,7 +153,10 @@ if __name__ == "__main__":
     # CreateAbdr('Test-Two-Elements-Same-Stiffness-Reinforcement', 0.2,3)
 
     # CreateAbdr('Test-Advanced-Hole', 0.2,3)
-    # CreateAbdr('Test-Basic-Hole', 0.2,3)
-    # CreateAbdr('Rura', 8.0, 3)
+    # CreateAbdr('Job-1', 0.2,3)
+
     # CreateAbdr('Dwuteownik', 8.0, 6)
-    CreateAbdr('bianco-saw595-ax', 8.0, 6)
+    c = CreateAbdr()
+    c.set_data('bianco-saw595-ax', 8.0, 6)
+    c.calculate_abdr()
+    print(c.get_results())
