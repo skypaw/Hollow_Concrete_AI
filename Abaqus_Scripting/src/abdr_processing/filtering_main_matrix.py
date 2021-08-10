@@ -13,7 +13,7 @@ def make_rotation(table_to_abdr, table_rotation):
     translation = table_rotation[0]
     rotation = table_rotation[1]
 
-    print translation, rotation, 'ROTATION TRANSLA'
+    # print translation, rotation, 'ROTATION TRANSLA'
 
     table_x = table_to_abdr[:, 1]
     table_y = table_to_abdr[:, 2]
@@ -31,7 +31,7 @@ def make_rotation(table_to_abdr, table_rotation):
     plt.show()"""
 
     table_x = make_translation(table_to_abdr, 1, translation[0])
-    table_y = make_translation(table_to_abdr, 2,translation[1])
+    table_y = make_translation(table_to_abdr, 2, translation[1])
     table_z = make_translation(table_to_abdr, 3, translation[2])
 
     """fig = plt.figure()
@@ -45,11 +45,11 @@ def make_rotation(table_to_abdr, table_rotation):
     plt.show()"""
 
     r1 = rotation[3:6]
-    print r1
+    # print r1
     angle = np.deg2rad(rotation[6])
-    print angle*r1[0]
+    # print angle*r1[0]
 
-    if (angle*r1[0] >= 0):
+    if (angle * r1[0] >= 0):
         T = [[1, 0, 0],
              [0, np.cos(angle), -np.sin(angle)],
              [0, np.sin(angle), np.cos(angle)]]
@@ -82,19 +82,23 @@ def make_rotation(table_to_abdr, table_rotation):
     maxz = max(table_z)
     minz = min(table_z)
 
+    # todo: check if it makes any differnet at all to move it to the center
+
     table_x = make_translation(table_to_abdr, 1, -maxx / 2)
     table_y = make_translation(table_to_abdr, 2, -maxy / 2)
-    table_z = make_translation(table_to_abdr, 3, -(abs(maxz)+abs(minz)) / 2)
+    table_z = make_translation(table_to_abdr, 3, -(abs(maxz) + abs(minz)) / 2)
 
-    """fig = plt.figure()
+    fig = plt.figure()
     fig.add_axes()
     ax = fig.gca(projection='3d')
-    ax.scatter(table_x, table_y, table_z)
+    ax.scatter(table_to_abdr[:, 1], table_to_abdr[:, 2], table_to_abdr[:, 3])
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.title('{}'.format('Nodes translation to center'))
-    plt.show()"""
+    plt.show()
+
+    print table_to_abdr
 
     return table_to_abdr
 
@@ -124,7 +128,6 @@ def nodes_location(file_name, number_of_dofs):
 
     minx = min(table_x)
     miny = min(table_y)
-
 
     """print(maxx, maxy, maxz), "Max values"
     print(minx, miny, minz), "min val"""

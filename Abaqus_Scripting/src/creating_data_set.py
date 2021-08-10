@@ -36,27 +36,36 @@ def call_abdr(step, batch_size):
     txt = genfromtxt("..\\resources\\dataToSubprocess.csv", delimiter=",")
 
     savedata_mian = []
+    create_abdr = CreateAbdr()
 
+    local_step = 1
     for model_data in txt:
         if model_data[0] < step:
+            local_step = step
             continue
         if model_data[0] >= step + batch_size:
             break
 
-        if os.path.exists("C:\\temp\\Job-{}-C.inp".format(int(step))):
+        if os.path.exists("C:\\temp\\Job-{}-C.inp".format(int(local_step))):
+
             try:
                 savedata = []
-                c = CreateAbdr("Job-{}".format(int(step)), model_data[1], 3)
+
+                create_abdr.set_data("Job-{}".format(int(local_step)), model_data[1], 3)
+                create_abdr.calculate_abdr()
 
                 for datadata in model_data:
                     savedata.append(datadata)
 
-                data2 = CreateAbdr.get_results(c)
+                data2 = CreateAbdr.get_results(create_abdr)
                 for datadatadatar in data2:
                     savedata.append(datadatadatar)
 
                 # save_to_csv(savedata, "C:\\temp\\batch_results{}".format(step))
                 savedata_mian.append(savedata)
+                local_step += 1
+                print local_step
+
             except:
                 print ("Problem with Job-{}".format(int(step)))
 
