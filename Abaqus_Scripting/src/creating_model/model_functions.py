@@ -20,13 +20,13 @@ def r_calculate(as_size):
     """r_calculate
     ==============
 
-    Function responsible for calculation of the mesh size
+    Function responsible for calculation one bar section area
 
     :param as_size: area of the reinforcement in model
     :return: area per one bar in model
     """
 
-    as_r = (as_size / pi) ** 0.5 / 2
+    as_r = as_size / 2
     return as_r
 
 

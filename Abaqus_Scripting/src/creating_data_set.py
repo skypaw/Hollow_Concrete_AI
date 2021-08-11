@@ -76,7 +76,7 @@ def create_data_to_subprocess():
     data = []
     i = 0
 
-    lhs_list = lhs(6, 24000, criterion='center')
+    lhs_list = lhs(6, 35000, criterion='center')
 
     a_start = 0.1
     a_end = 0.18
@@ -111,13 +111,16 @@ def create_data_to_subprocess():
         r = dimensions[4] * r_interval + r_start
         l = dimensions[5] * l_interval + l_start
 
-        if 2 * r + 0.01 >= a:
+        if 2 * r + 0.02 >= a:
             continue
 
-        if 2 * a1 + r * 2 + l + 0.01 >= h - 2 * a1:
+        if 2 * a1 + r * 2 + l + 0.02 >= h - 2 * a1:
             continue
 
         if 2 * a1 + 0.01 >= a:
+            continue
+
+        if l < 0.005:
             continue
 
         i += 1
