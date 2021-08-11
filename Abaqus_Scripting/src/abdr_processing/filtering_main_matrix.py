@@ -88,7 +88,7 @@ def make_rotation(table_to_abdr, table_rotation):
     table_y = make_translation(table_to_abdr, 2, -maxy / 2)
     table_z = make_translation(table_to_abdr, 3, -(abs(maxz) + abs(minz)) / 2)
 
-    fig = plt.figure()
+    """fig = plt.figure()
     fig.add_axes()
     ax = fig.gca(projection='3d')
     ax.scatter(table_to_abdr[:, 1], table_to_abdr[:, 2], table_to_abdr[:, 3])
@@ -96,9 +96,9 @@ def make_rotation(table_to_abdr, table_rotation):
     ax.set_ylabel('y')
     ax.set_zlabel('z')
     plt.title('{}'.format('Nodes translation to center'))
-    plt.show()
+    plt.show()"""
 
-    print table_to_abdr
+    # print table_to_abdr
 
     return table_to_abdr
 

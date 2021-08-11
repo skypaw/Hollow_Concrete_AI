@@ -139,17 +139,21 @@ def calculate():
 
         step, batch = data
 
-    try:
         while step in file_csv[:, 0]:
-            subprocess.call("abaqus cae noGUI=abaqus_subprocess.py", shell=True)
+            try:
+                subprocess.call("abaqus cae noGUI=abaqus_subprocess.py", shell=True)
 
-            call_abdr(step, data[1])
-            delete_files(step, data[1])
+                call_abdr(step, data[1])
+                delete_files(step, data[1])
 
-            step += batch
+                step += batch
 
-    except:
-        print ("problem with step {}".format(step))
+            except:
+                print ("problem with step {}".format(step))
+
+            finally:
+                print ("corrupted ffile in step {}".format(step))
+                step += batch
 
 
 if __name__ == "__main__":
