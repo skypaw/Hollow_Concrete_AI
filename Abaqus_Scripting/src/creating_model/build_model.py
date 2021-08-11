@@ -108,7 +108,7 @@ class Model:
 
         Function responsible for creating section for the models from existing materials.
         """
-        as_r = m_functions.r_calculate(self._as)
+        as_area = m_functions.r_calculate(self._as)
 
         self._model_parameters.HomogeneousSolidSection(name='Section-concrete',
                                                        material=self._concrete_material_name,
@@ -116,7 +116,7 @@ class Model:
 
         self._model_parameters.TrussSection(name='Section-reinforcement',
                                             material=self._steel_material_name,
-                                            area=as_r)
+                                            area=as_area)
 
     def _step_create(self):
         """step create function
@@ -192,7 +192,6 @@ class Model:
         self._model_parameters.EmbeddedRegion(name='Constraint-1', embeddedRegion=region1, hostRegion=region2,
                                               weightFactorTolerance=1e-06, absoluteTolerance=0.0,
                                               fractionalTolerance=0.05, toleranceMethod=BOTH)
-
 
         self._save_model()
 

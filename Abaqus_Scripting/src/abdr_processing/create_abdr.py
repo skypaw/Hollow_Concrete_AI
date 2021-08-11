@@ -19,9 +19,8 @@ class CreateAbdr:
 
         print self.__file_name, self.__a, self.__area
 
-
         self.__matrix_k = creating_global_matrix(self.__file_name, self.__ndof)
-        print self.__matrix_k.shape, "Shape of the Main Matrix"
+        #print self.__matrix_k.shape, "Shape of the Main Matrix"
 
         dof_external, dof_internal, nodes_external_inp, nodes_correction = nodes_location(self.__file_name, self.__ndof)
 
@@ -30,7 +29,7 @@ class CreateAbdr:
         matrix_k_ei = self.filtering_matrix(dof_external, dof_internal)
         matrix_k_ie = self.filtering_matrix(dof_internal, dof_external)
 
-        print(matrix_k_ee.shape, matrix_k_ei.shape, matrix_k_ie.shape, matrix_k_ii.shape), "Shape of the Sub Matricies"
+        #print(matrix_k_ee.shape, matrix_k_ei.shape, matrix_k_ie.shape, matrix_k_ii.shape), "Shape of the Sub Matricies"
 
         matrix_k_ = self.calculate_condensed_matrix(matrix_k_ee, matrix_k_ei, matrix_k_ii, matrix_k_ie)
         print (matrix_k_.shape), "Shape of the Condensed Matrix"
@@ -156,7 +155,12 @@ if __name__ == "__main__":
     # CreateAbdr('Job-1', 0.2,3)
 
     # CreateAbdr('Dwuteownik', 8.0, 6)
-    c = CreateAbdr()
+    """c = CreateAbdr()
     c.set_data('bianco-saw595-ax', 8.0, 6)
+    c.calculate_abdr()
+    print(c.get_results())"""
+
+    c = CreateAbdr()
+    c.set_data('Job-1', 0.14284457142857143, 3)
     c.calculate_abdr()
     print(c.get_results())

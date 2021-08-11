@@ -76,7 +76,7 @@ def create_data_to_subprocess():
     data = []
     i = 0
 
-    lhs_list = lhs(6, 24000, criterion='center')
+    lhs_list = lhs(6, 35000, criterion='center')
 
     a_start = 0.1
     a_end = 0.18
@@ -86,8 +86,8 @@ def create_data_to_subprocess():
     h_end = 0.5
     h_interval = h_end - h_start
 
-    a_s_start = 0.000023
-    a_s_end = 0.000112
+    a_s_start = 0.000001
+    a_s_end = 0.000644
     a_s_interval = a_s_end - a_s_start
 
     a1_start = 0.02
@@ -111,13 +111,16 @@ def create_data_to_subprocess():
         r = dimensions[4] * r_interval + r_start
         l = dimensions[5] * l_interval + l_start
 
-        if 2 * r + 0.01 >= a:
+        if 2 * r + 0.02 >= a:
             continue
 
-        if 2 * a1 + r * 2 + l + 0.01 >= h - 2 * a1:
+        if 2 * a1 + r * 2 + l + 0.02 >= h - 2 * a1:
             continue
 
         if 2 * a1 + 0.01 >= a:
+            continue
+
+        if l < 0.005:
             continue
 
         i += 1
@@ -139,17 +142,21 @@ def calculate():
 
         step, batch = data
 
-    try:
         while step in file_csv[:, 0]:
-            subprocess.call("abaqus cae noGUI=abaqus_subprocess.py", shell=True)
+            try:
+                subprocess.call("abaqus cae noGUI=abaqus_subprocess.py", shell=True)
 
-            call_abdr(step, data[1])
-            delete_files(step, data[1])
+                call_abdr(step, data[1])
+                delete_files(step, data[1])
 
-            step += batch
+                step += batch
 
-    except:
-        print ("problem with step {}".format(step))
+            except:
+                print ("problem with step {}".format(step))
+
+            finally:
+                print ("corrupted ffile in step {}".format(step))
+                step += batch
 
 
 if __name__ == "__main__":
