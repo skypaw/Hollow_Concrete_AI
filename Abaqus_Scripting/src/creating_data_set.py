@@ -86,8 +86,8 @@ def create_data_to_subprocess():
     h_end = 0.5
     h_interval = h_end - h_start
 
-    a_s_start = 0.000023
-    a_s_end = 0.000112
+    a_s_start = 0.000001
+    a_s_end = 0.000644
     a_s_interval = a_s_end - a_s_start
 
     a1_start = 0.02

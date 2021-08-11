@@ -42,5 +42,6 @@ def change_input(job_name, job_name_changed):
 if __name__ == "__main__":
     print("Testing of the input")
 
-    change_input('Rura', 'Rura-C')
+    #change_input('Rura', 'Rura-C')
+    change_input('Job-1', 'Job-1-C')
 

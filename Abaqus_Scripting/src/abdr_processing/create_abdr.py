@@ -155,7 +155,12 @@ if __name__ == "__main__":
     # CreateAbdr('Job-1', 0.2,3)
 
     # CreateAbdr('Dwuteownik', 8.0, 6)
-    c = CreateAbdr()
+    """c = CreateAbdr()
     c.set_data('bianco-saw595-ax', 8.0, 6)
+    c.calculate_abdr()
+    print(c.get_results())"""
+
+    c = CreateAbdr()
+    c.set_data('Job-1', 0.14284457142857143, 3)
     c.calculate_abdr()
     print(c.get_results())
