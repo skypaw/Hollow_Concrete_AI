@@ -29,7 +29,7 @@ def delete_files(step, batch_size):
                 os.remove("C:\\temp\\Job-{}-C.dat".format(int(line[0])))
 
             except:
-                print "Error with removing Job-{}".format(int(line[0]))
+                print ("Error with removing Job-{}".format(int(line[0])))
 
 
 def call_abdr(step, batch_size):
@@ -64,10 +64,10 @@ def call_abdr(step, batch_size):
                 # save_to_csv(savedata, "C:\\temp\\batch_results{}".format(step))
                 savedata_mian.append(savedata)
                 local_step += 1
-                print local_step
+
 
             except:
-                print ("Problem with Job-{}".format(int(step)))
+                print("Problem with Job-{}".format(int(step)))
 
     save_to_csv(savedata_mian, "C:\\temp\\batch_results{}".format(step))
 
@@ -133,7 +133,7 @@ def create_data_to_subprocess():
 def calculate():
     # todo:move batch size -> batch size for now in step.txt
 
-    file_csv = genfromtxt("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\dataToSubprocess.csv", delimiter=",")
+    file_csv = genfromtxt("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\dataCircleToSubprocess.csv", delimiter=",")
 
     with open("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\step.txt", "r") as file:
         data = []
@@ -152,11 +152,10 @@ def calculate():
                 step += batch
 
             except:
-                print ("problem with step {}".format(step))
+                print("problem with step {}".format(step))
 
             finally:
-                print ("corrupted ffile in step {}".format(step))
-                step += batch
+                print("corrupted file in step {}".format(step))
 
 
 if __name__ == "__main__":
