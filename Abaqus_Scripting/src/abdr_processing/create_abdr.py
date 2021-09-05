@@ -161,6 +161,6 @@ if __name__ == "__main__":
     print(c.get_results())"""
 
     c = CreateAbdr()
-    c.set_data('Job-1', 0.14284457142857143, 3)
+    c.set_data('Job-1', 0.17, 3)
     c.calculate_abdr()
     print(c.get_results())

@@ -4,7 +4,7 @@ from tensorflow.keras.models import Sequential, save_model
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.callbacks import TensorBoard
 
-from readCSV import read_csv
+from readCSV import shuffle_data
 import numpy as np
 from tensorflow.keras.wrappers.scikit_learn import KerasRegressor
 
@@ -25,28 +25,15 @@ class CreatingModel:
     __NAME = f"Concrete-parameter-RF{int(time.time())}"
 
     def __init__(self):
-        self.__dim = read_csv('dimensions')
-        self.__res = read_csv('results')
-
-        self.__res_optimized = []
-
-        for i in self.__res:
-            self.__res_optimized.append(i / 1e10)
-
-        self.__res_optimized = np.array(self.__res_optimized)
-
-        print(self.__res_optimized[1])
-        print(self.__dim[0])
+        data_to_split = shuffle_data()
+        self.__dim = data_to_split[:, 1:7]
+        self.__res = data_to_split[:, 7:]
 
         self.__tensor_board = TensorBoard(log_dir=f'logs/{self.__NAME}')
 
-        self.optimize_data()
         self.creating_model()
-        self.estimator()
-        self.save_model()
-
-    def optimize_data(self):
-        self.__dim, self.__res_optimized = shuffle(self.__dim, self.__res_optimized)
+        # self.estimator()
+        # self.save_model()
 
     def creating_model(self):
         """Creating model method
@@ -56,30 +43,27 @@ class CreatingModel:
         """
         print(self.__dim is np.array)
 
-        self.__model = Sequential([Dense(units=16, input_shape=(5,), activation='relu'),
-                                   Dense(units=16),
-                                   Dense(units=8, activation='relu'),
-                                   Dense(units=8),
-                                   Dense(units=4, activation='relu'),
-                                   Dense(units=4),
-                                   Dense(units=2, activation='relu'),
-                                   Dense(units=2),
-                                   Dense(units=1)])
+        self.__model = Sequential([Dense(units=32, input_shape=(6,), activation='relu'),
+                                   Dense(units=16, activation='relu'),
+                                   Dense(units=10), ])
 
         self.__model.summary()
 
-        '''      self.__model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
-                  self.__plot_from_model = self.__model.fit(x=self.__dim, y=self.__res_optimized, validation_split=0.2,
-                                                  epochs=100, batch_size=5,
-                                                  callbacks=self.__tensor_board)'''
+        self.__model.compile(optimizer='adam', loss='mean_squared_error', metrics=['accuracy'])
+        self.__plot_from_model = self.__model.fit(x=self.__dim, y=self.__res, validation_split=0.25,
+                                                  epochs=1000, batch_size=100,
+                                                  callbacks=self.__tensor_board)
 
-        print(self.__model.get_weights())
+
+
+
+        # print(self.__model.get_weights())
         return self.__model
 
     def estimator(self):
-        estimator = KerasRegressor(build_fn=self.creating_model, epochs=100, batch_size=10, verbose=0)
+        estimator = KerasRegressor(build_fn=self.creating_model, epochs=10, batch_size=1100, verbose=0)
         kfold = KFold(n_splits=10)
-        results = cross_val_score(estimator, self.__dim, self.__res_optimized, cv=kfold)
+        results = cross_val_score(estimator, self.__dim, self.__res, cv=kfold)
         print(results.mean())
 
     def save_model(self):
@@ -95,4 +79,5 @@ class CreatingModel:
         pass
 
 
-CreatingModel()
+if __name__ == '__main__':
+    CreatingModel()

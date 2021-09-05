@@ -1,6 +1,6 @@
-abapy @ git+https://github.com/lcharleux/abapy@d9c751e7d67b9ea0d06db6e7f33d0fe845b596ef
-matplotlib==2.2.5
-numpy==1.16.6
-pandas==0.24.2
-pyparsing==2.4.7
-scipy==1.2.3
+numpy~=1.19.5
+matplotlib~=3.3.4
+scikit-learn~=0.24.1
+tensorflow~=2.4.1
+scipy~=1.6.1
+ezdxf~=0.16.5
