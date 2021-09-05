@@ -58,7 +58,7 @@ def draw(doc, i, a, h, as1, a1, r, l, base_x, base_y):
 
 
 def visualize_models():
-    dimensions_csv = np.genfromtxt("D:\\dev\\Masters_Degree\\Deep_Learning\\resources\\full_data.csv",
+    dimensions_csv = np.genfromtxt("/full_data.csv",
                                    delimiter=",")
 
     max_a = max(dimensions_csv[:, 1]) * 100 * 2

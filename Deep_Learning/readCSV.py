@@ -23,7 +23,7 @@ def read_batches(name):
 
 
 def clear_full_data():
-    array_data = np.genfromtxt("resources\\full_data.csv", delimiter=",")
+    array_data = np.genfromtxt("full_data.csv", delimiter=",")
     for line in array_data:
         if int(line[0]) >= 12001:
             line[6]=0
@@ -31,7 +31,7 @@ def clear_full_data():
     return array_data
 
 def shuffle_data():
-    array_data = np.genfromtxt("resources\\full_data.csv", delimiter=",")
+    array_data = np.genfromtxt("full_data.csv", delimiter=",")
 
     np.random.shuffle(array_data)
 

@@ -7,13 +7,15 @@ import numpy as np
 from readCSV import shuffle_data
 from statistics import mean
 
+from joblib import dump
+
 mse = []
 
-tuple_list = [(2048, 1024), (4096, 2048), (2048, 1024, 512), (4096, 2048, 1024), (2048, 1024, 512, 256),
-              (4096, 2048, 1024, 512)]
-
+# tuple_list = [(1024, 2048, 4096), (512, 1024, 512), (1024, 1024), (1024, 2048, 1024)]
+tuple_list = [(2048, 4096), (2048, 2048), (2048, 2048, 1024), (2048, 2048, 1024, 1024), (8192, 8192),
+              (8192, 8192, 4096), (4096, 4096), (16384, 8192), (8192, 16384)]
+# kroks = [600, 800]
 kroks = [200, 400, 600, 800]
-
 do_csvki = []
 
 for krok in kroks:
@@ -55,10 +57,12 @@ for krok in kroks:
         sum = 0
         mse.clear()
 
-        with open("asdf.txt", "w") as file_text:
+        with open("asdf4.txt", "w") as file_text:
             for tekst in do_csvki:
                 file_text.write(str(tekst))
                 file_text.write("\n")
+
+dump(model, 'testmodel.joblib')
 
 # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
 # regr = MLPRegressor(random_state=1, max_iter=1000,hidden_layer_sizes=(200,)).fit(X_train, y_train)
