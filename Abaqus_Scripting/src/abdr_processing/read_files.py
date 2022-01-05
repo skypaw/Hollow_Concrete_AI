@@ -5,7 +5,7 @@ from warnings import warn
 def append_items_to_table(line, table_to_return):
     table_line = []
     if not line.startswith("*"):
-        for items in line.split(','):
+        for items in line.split(","):
             table_line.append(float(items))
     if not table_line == []:
         table_to_return.append(table_line)
@@ -27,11 +27,15 @@ def reading_inp_file(file_name):
 
             # Bool statements to navigate in the file
 
-            if line.startswith("*Part, name=Concrete-Cube") or line.startswith("*Part, name=P"):
+            if line.startswith("*Part, name=Concrete-Cube") or line.startswith(
+                "*Part, name=P"
+            ):
                 is_main_part = True
                 continue
 
-            if line.startswith("*Instance, name=ConcreteCube-1") or line.startswith("*Instance, name=P"):
+            if line.startswith("*Instance, name=ConcreteCube-1") or line.startswith(
+                "*Instance, name=P"
+            ):
                 is_assembly_line = True
                 continue
 
@@ -63,7 +67,7 @@ def reading_inp_file(file_name):
 def read_mtx(file_name):
     sparse_matrix_table = []
 
-    with open('C:\\temp\\{}-C_STIF1.mtx'.format(file_name)) as input_file:
+    with open("C:\\temp\\{}-C_STIF1.mtx".format(file_name)) as input_file:
         for line in input_file:
             append_items_to_table(line, sparse_matrix_table)
 
@@ -72,4 +76,3 @@ def read_mtx(file_name):
 
 if __name__ == "__main__":
     print(reading_inp_file("bianco-saw"))
-

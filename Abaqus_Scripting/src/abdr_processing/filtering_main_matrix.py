@@ -13,50 +13,35 @@ def make_rotation(table_to_abdr, table_rotation):
     translation = table_rotation[0]
     rotation = table_rotation[1]
 
-    # print translation, rotation, 'ROTATION TRANSLA'
-
     table_x = table_to_abdr[:, 1]
     table_y = table_to_abdr[:, 2]
     table_z = table_to_abdr[:, 3]
 
-    """fig = plt.figure()
-    fig.add_axes()
-    ax = fig.gca(projection='3d')
-
-    ax.scatter(table_x, table_y, table_z)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    plt.title('{}'.format('Nodes before correction'))
-    plt.show()"""
+    plot(table_x, table_y, table_z, 'Nodes before correction')
 
     table_x = make_translation(table_to_abdr, 1, translation[0])
     table_y = make_translation(table_to_abdr, 2, translation[1])
     table_z = make_translation(table_to_abdr, 3, translation[2])
 
-    """fig = plt.figure()
-    fig.add_axes()
-    ax = fig.gca(projection='3d')
-    ax.scatter(table_x, table_y, table_z)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    plt.title('{}'.format('Nodes after translation'))
-    plt.show()"""
+    plot(table_x, table_y, table_z, 'Nodes after translation')
 
     r1 = rotation[3:6]
     # print r1
     angle = np.deg2rad(rotation[6])
     # print angle*r1[0]
 
-    if (angle * r1[0] >= 0):
-        T = [[1, 0, 0],
-             [0, np.cos(angle), -np.sin(angle)],
-             [0, np.sin(angle), np.cos(angle)]]
+    if angle * r1[0] >= 0:
+        T = [
+            [1, 0, 0],
+            [0, np.cos(angle), -np.sin(angle)],
+            [0, np.sin(angle), np.cos(angle)],
+        ]
     else:
-        T = [[1, 0, 0],
-             [0, np.cos(angle), np.sin(angle)],
-             [0, -np.sin(angle), np.cos(angle)]]
+        T = [
+            [1, 0, 0],
+            [0, np.cos(angle), np.sin(angle)],
+            [0, -np.sin(angle), np.cos(angle)],
+        ]
 
     srodGlob = r1
     for i in range(len(table_to_abdr)):
@@ -67,15 +52,7 @@ def make_rotation(table_to_abdr, table_rotation):
         punkt1Glob = np.transpose(punkt1lok) + r1
         table_to_abdr[i][1:] = punkt1Glob
 
-    """fig = plt.figure()
-    fig.add_axes()
-    ax = fig.gca(projection='3d')
-    ax.scatter(table_x, table_y, table_z)
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    plt.title('{}'.format('Nodes after rotation'))
-    plt.show()"""
+    plot(table_x, table_y, table_z, 'Nodes after rotation')
 
     maxx = max(table_x)
     maxy = max(table_y)
@@ -88,28 +65,20 @@ def make_rotation(table_to_abdr, table_rotation):
     table_y = make_translation(table_to_abdr, 2, -maxy / 2)
     table_z = make_translation(table_to_abdr, 3, -(abs(maxz) + abs(minz)) / 2)
 
-    """fig = plt.figure()
-    fig.add_axes()
-    ax = fig.gca(projection='3d')
-    ax.scatter(table_to_abdr[:, 1], table_to_abdr[:, 2], table_to_abdr[:, 3])
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
-    plt.title('{}'.format('Nodes translation to center'))
-    plt.show()"""
-
-    # print table_to_abdr
+    plot(table_x, table_y, table_z, 'Nodes translation to center')
 
     return table_to_abdr
 
 
 def calculate_dofs(ext_int, number_of_dofs):
-    mtx_dof = []
+    degrees_of_freedom_mtx = []
+
     for node in ext_int:
         ndof_index = node * number_of_dofs
         for nodes in range(number_of_dofs):
-            mtx_dof.append(ndof_index + nodes)
-    return np.array(mtx_dof)
+            degrees_of_freedom_mtx.append(ndof_index + nodes)
+
+    return np.array(degrees_of_freedom_mtx)
 
 
 def nodes_location(file_name, number_of_dofs):
@@ -129,8 +98,6 @@ def nodes_location(file_name, number_of_dofs):
     minx = min(table_x)
     miny = min(table_y)
 
-    """print(maxx, maxy, maxz), "Max values"
-    print(minx, miny, minz), "min val"""
 
     diff_x = abs(maxx - minx)
     diff_y = abs(maxy - miny)
@@ -147,8 +114,12 @@ def nodes_location(file_name, number_of_dofs):
         index_x = table_x[index]
         index_y = table_y[index]
 
-        if abs(index_x - diff_x / 2) <= 1e-4 or abs(index_y - diff_y / 2) <= 1e-4 \
-                or abs(index_x + diff_x / 2) <= 1e-4 or abs(index_y + diff_y / 2) <= 1e-4:
+        if (
+            abs(index_x - diff_x / 2) <= 1e-4
+            or abs(index_y - diff_y / 2) <= 1e-4
+            or abs(index_x + diff_x / 2) <= 1e-4
+            or abs(index_y + diff_y / 2) <= 1e-4
+        ):
             external_from_file.append(index_number)
         else:
             internal_from_file.append(index_number)
@@ -156,4 +127,22 @@ def nodes_location(file_name, number_of_dofs):
     mtx_external_dof = calculate_dofs(external_from_file, number_of_dofs)
     mtx_internal_dof = calculate_dofs(internal_from_file, number_of_dofs)
 
-    return mtx_external_dof, mtx_internal_dof, np.array(external_from_file), table_to_abdr
+    return (
+        mtx_external_dof,
+        mtx_internal_dof,
+        np.array(external_from_file),
+        table_to_abdr,
+    )
+
+
+def plot(table_x, table_y, table_z, title_string):
+    fig = plt.figure()
+    fig.add_axes()
+    ax = fig.gca(projection='3d')
+
+    ax.scatter(table_x, table_y, table_z)
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_zlabel('z')
+    plt.title('{}'.format(title_string))
+    plt.show()

@@ -23,7 +23,9 @@ def calculate_index(mtx_indexes, number_of_ndofs):
 def creating_global_matrix(file_name, number_of_ndofs):
     mtx_data_from_file = read_mtx(file_name)
 
-    i_mtx_index, j_mtx_index, data_mtx = calculate_index(mtx_data_from_file, number_of_ndofs)
+    i_mtx_index, j_mtx_index, data_mtx = calculate_index(
+        mtx_data_from_file, number_of_ndofs
+    )
 
     bottom_part_matrix = csr_matrix((data_mtx, (i_mtx_index, j_mtx_index)))
     top_part_matrix = csr_matrix.transpose(bottom_part_matrix)

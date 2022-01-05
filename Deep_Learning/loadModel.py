@@ -26,7 +26,9 @@ class LoadModel:
         self.__load_model(model_name)
 
     def __load_model(self, model_name):
-        self.__model = load_model(f'resources\\{model_name}', compile=True, options=None)
+        self.__model = load_model(
+            f"resources\\{model_name}", compile=True, options=None
+        )
 
     def predict_value(self, value_for_prediction):
         """Predict value method
@@ -39,19 +41,19 @@ class LoadModel:
         return predicted_value
 
 
-ste = LoadModel('model')
+ste = LoadModel("model")
 
-_dim = read_csv('dimensions')
-_res = read_csv('results')
+_dim = read_csv("dimensions")
+_res = read_csv("results")
 
 i = 0
 
 accuracy = []
 for f in _dim:
     pred = float(LoadModel.predict_value(ste, np.array([f])))
-    eq = abs(abs(pred) - abs(_res[i]/1e10))/abs(_res[i]/1e10)*100
+    eq = abs(abs(pred) - abs(_res[i] / 1e10)) / abs(_res[i] / 1e10) * 100
     accuracy.append(eq)
     print(pred)
-    i =i+1
+    i = i + 1
 
-print (f'Błąd w przewidywaniu = {np.mean(accuracy)}%')
+print(f"Błąd w przewidywaniu = {np.mean(accuracy)}%")
