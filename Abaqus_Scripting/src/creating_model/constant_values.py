@@ -3,7 +3,7 @@ YOUNG_CONCRETE = 30e9
 POISSON_REINFORCEMENT = 0.3
 POISSON_CONCRETE = 0.2
 
-MODEL_DATABASE_NAME = "C:/temp/model-test-35"
+MODEL_DATABASE_NAME = "C:/temp/model-tests-35"
 
 MODEL_NAME = "Hollow-Concrete"
 
