@@ -66,7 +66,7 @@ def check_dimensions(r, l, a, a1, h):
 
 
 if __name__ == "__main__":
-    print('Testing functions')
+    print("Testing functions")
 
     __mesh_size = mesh_calculation(10, 10)
     __r_size = r_calculate(4)
@@ -74,4 +74,4 @@ if __name__ == "__main__":
 
     print(__mesh_size)
     print(__r_size)
-    print('10', __new_r, '10', __new_l, '2', __a1)
+    print("10", __new_r, "10", __new_l, "2", __a1)

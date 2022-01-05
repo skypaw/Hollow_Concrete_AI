@@ -6,10 +6,15 @@ from numpy import genfromtxt
 def call_abaqus():
     cDS = Model()
 
-    file_csv = genfromtxt("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\dataCircleToSubprocess.csv", delimiter=",")
+    file_csv = genfromtxt(
+        "D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\dataCircleToSubprocess.csv",
+        delimiter=",",
+    )
     old_dimensions = [0, 0, 0, 0, 0, 0, 0]
 
-    with open("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\step.txt", "r") as file_read:
+    with open(
+        "D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\step.txt", "r"
+    ) as file_read:
         data = []
         for line in file_read:
             data.append(float(line))
@@ -22,7 +27,9 @@ def call_abaqus():
         if line[0] >= step + batch:
             break
 
-        Model.set_dimensions(cDS, line[0], line[1], line[2], line[3], line[4], line[5], line[6])
+        Model.set_dimensions(
+            cDS, line[0], line[1], line[2], line[3], line[4], line[5], line[6]
+        )
         Model.check_dimensions(cDS)
 
         new_dimensions = Model.get_dimensions(cDS)
@@ -34,9 +41,12 @@ def call_abaqus():
         old_dimensions = Model.get_dimensions(cDS)
 
     step += batch
-    with open("D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\step.txt", "w") as file_write:
+    with open(
+        "D:\\dev\\Masters_Degree\\Abaqus_Scripting\\resources\\step.txt", "w"
+    ) as file_write:
         file_write.write(str(step) + "\n")
         file_write.write(str(batch))
 
 
-call_abaqus()
+if __name__ == "__main__":
+    call_abaqus()

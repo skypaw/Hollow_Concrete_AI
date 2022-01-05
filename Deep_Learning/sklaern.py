@@ -11,16 +11,15 @@ from joblib import dump
 
 mse = []
 
-# tuple_list = [(1024, 2048, 4096), (512, 1024, 512), (1024, 1024), (1024, 2048, 1024)]
-tuple_list = [(2048, 4096), (2048, 2048), (2048, 2048, 1024), (2048, 2048, 1024, 1024), (8192, 8192),
-              (8192, 8192, 4096), (4096, 4096), (16384, 8192), (8192, 16384)]
-# kroks = [600, 800]
-kroks = [200, 400, 600, 800]
+tuple_list = [(1024, 8192)]
+
+kroks = [400]
 do_csvki = []
 
-for krok in kroks:
-    for tuple_item in tuple_list:
-        for j in range(5):
+
+for tuple_item in tuple_list:
+    for krok in kroks:
+        for j in range(10):
             print(f"tuple ={tuple_item}")
             data_to_split = shuffle_data()
             X = data_to_split[:, 1:7]
@@ -35,7 +34,9 @@ for krok in kroks:
 
             X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
 
-            model = MLPRegressor(random_state=1, max_iter=krok, hidden_layer_sizes=tuple_item)
+            model = MLPRegressor(
+                random_state=1, max_iter=krok, hidden_layer_sizes=tuple_item
+            )
             model.fit(X_train, y_train)
 
             # print(y_test[0], model.predict(X_test)[0])
@@ -44,6 +45,8 @@ for krok in kroks:
             print(f"MSE: {test} ")
             # print(model.score(X_test, y_test))
             mse.append(test)
+
+            dump(model, f"testmodel{j}.joblib")
         sum = 0
         for k in mse:
             sum += k
@@ -57,12 +60,11 @@ for krok in kroks:
         sum = 0
         mse.clear()
 
-        with open("asdf4.txt", "w") as file_text:
+        with open("asdf12.txt", "w") as file_text:
             for tekst in do_csvki:
                 file_text.write(str(tekst))
                 file_text.write("\n")
 
-dump(model, 'testmodel.joblib')
 
 # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
 # regr = MLPRegressor(random_state=1, max_iter=1000,hidden_layer_sizes=(200,)).fit(X_train, y_train)

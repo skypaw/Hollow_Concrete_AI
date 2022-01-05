@@ -49,14 +49,18 @@ def make_rotation(table_to_abdr, table_rotation):
     angle = np.deg2rad(rotation[6])
     # print angle*r1[0]
 
-    if (angle * r1[0] >= 0):
-        T = [[1, 0, 0],
-             [0, np.cos(angle), -np.sin(angle)],
-             [0, np.sin(angle), np.cos(angle)]]
+    if angle * r1[0] >= 0:
+        T = [
+            [1, 0, 0],
+            [0, np.cos(angle), -np.sin(angle)],
+            [0, np.sin(angle), np.cos(angle)],
+        ]
     else:
-        T = [[1, 0, 0],
-             [0, np.cos(angle), np.sin(angle)],
-             [0, -np.sin(angle), np.cos(angle)]]
+        T = [
+            [1, 0, 0],
+            [0, np.cos(angle), np.sin(angle)],
+            [0, -np.sin(angle), np.cos(angle)],
+        ]
 
     srodGlob = r1
     for i in range(len(table_to_abdr)):
@@ -147,8 +151,12 @@ def nodes_location(file_name, number_of_dofs):
         index_x = table_x[index]
         index_y = table_y[index]
 
-        if abs(index_x - diff_x / 2) <= 1e-4 or abs(index_y - diff_y / 2) <= 1e-4 \
-                or abs(index_x + diff_x / 2) <= 1e-4 or abs(index_y + diff_y / 2) <= 1e-4:
+        if (
+            abs(index_x - diff_x / 2) <= 1e-4
+            or abs(index_y - diff_y / 2) <= 1e-4
+            or abs(index_x + diff_x / 2) <= 1e-4
+            or abs(index_y + diff_y / 2) <= 1e-4
+        ):
             external_from_file.append(index_number)
         else:
             internal_from_file.append(index_number)
@@ -156,4 +164,9 @@ def nodes_location(file_name, number_of_dofs):
     mtx_external_dof = calculate_dofs(external_from_file, number_of_dofs)
     mtx_internal_dof = calculate_dofs(internal_from_file, number_of_dofs)
 
-    return mtx_external_dof, mtx_internal_dof, np.array(external_from_file), table_to_abdr
+    return (
+        mtx_external_dof,
+        mtx_internal_dof,
+        np.array(external_from_file),
+        table_to_abdr,
+    )
