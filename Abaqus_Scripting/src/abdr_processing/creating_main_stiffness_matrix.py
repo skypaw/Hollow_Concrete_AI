@@ -13,8 +13,8 @@ def calculate_index(mtx_indexes, number_of_ndofs):
         i_index = (a - 1) * number_of_ndofs + b - 1
         j_index = (c - 1) * number_of_ndofs + d - 1
 
-        i_table.append(int(round(i_index, 0)))
-        j_table.append(int(round(j_index, 0)))
+        i_table.append(int(i_index))
+        j_table.append(int(j_index))
         data_table.append(e)
 
     return i_table, j_table, data_table

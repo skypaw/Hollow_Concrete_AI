@@ -9,5 +9,5 @@ class TestCreateAbdr:
         c.calculate_abdr()
 
         print(c.get_results())
-        t = 1
-        assert c.get_results() == pytest.approx(t)
+        t = [2139.7, 1664.5, 382.9, 662.53, 6392.2, 3859.4, 1114.7, 1655.5, 202.42, 98.973]
+        assert c.get_results() == pytest.approx(t, 0.05)
