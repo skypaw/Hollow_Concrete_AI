@@ -1,8 +1,8 @@
-# Masters_Degree
-Neural network with Civil Engeeniering
+# Hollow_Concrete_AI
+Neural network with Civil Engeeniering for Masters degree project
 
 ## Using
-- Keras
+- scipy
 - Numpy
 - Matplotlib
 - Abaqus
